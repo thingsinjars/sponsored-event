@@ -1,0 +1,64 @@
+{{> head }}
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <h1 class="text-center">{{title}}</h1>
+    </div>
+    <div class="alert alert-light" id="status"></div>
+    <div class="row">
+      <table>
+        <tr>
+          <th>Event Name</th>
+          <td><a href="/event/{{params.eventId}}" id="showEventName">...</a></td>
+        </tr>
+        <tr>
+          <th>Recipient Name</th>
+          <td id="showRecipientName">...</td>
+        </tr>
+        <tr>
+          <th>Participant Name</th>
+          <td><a href="/event/{{params.eventId}}/participant/{{params.participantId}}" id="showParticipantName">...</a></td>
+        </tr>
+        <tr>
+          <th>OrganiserId</th>
+          <td id="showOrganiserId"></td>
+        </tr>
+        <tr>
+          <th>Event Balance</th>
+          <td id="showEventBalance"></td>
+        </tr>
+        <tr>
+          <th>My Account</th>
+          <td id="myAccount"></td>
+        </tr>
+        <tr>
+      </table>
+    </div>
+    <div class="row justify-content-center tab-content">
+      <form class="w-100 text-light" id="pledgeTab">
+        <h2>Pledge money</h2>
+        <input type="hidden" class="form-control" id="pledgeEventId" placeholder="Enter event ID" value="{{params.eventId}}">
+        <input type="hidden" class="form-control" id="pledgeParticipantId" placeholder="Enter participant ID" value="{{params.participantId}}">
+        <div class="form-group">
+          <label for="sponsorName">Sponsor Name</label>
+          <input type="text" class="form-control" id="sponsorName" placeholder="Enter Sponsor name ID" value="Test Sponsor">
+          <small id="sponsorNameHelp" class="form-text text-light">This is the publicly-visible name of the sponsor.</small>
+        </div>
+        <div class="form-group">
+          <label for="sponsorAmount">Pledge amount</label>
+          <input type="number" class="form-control" id="pledgeAmount" value="0.02">
+          <small id="sponsorAmountHelp" class="form-text text-light">The amount (in Ether) the sponsor the particpant for. Must be greater than zero.</small>
+        </div>
+        <button type="submit" class="btn btn-light" id="pledgeButton">Pledge</button>
+      </form>
+    </div>
+  </div>
+{{> scripts }}
+  <script>
+  App.onLoad = () => {
+    return App.loadEvent("{{params.eventId}}")
+      .then(App.showEventDetails)
+      .then(() => App.showParticipantDetails({{params.participantId}}));
+  };
+  </script>
+{{> foot }}

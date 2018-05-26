@@ -5,7 +5,7 @@ Manage funds and charity pledges through a smart contract. This can be used to m
 
 No more chasing people for money after the event. No need to worry about how or whether the money makes it to the charity. Partial completion (e.g. making it half-way around a course, only eating 0.5 million baked beans...) results in partial donation with the remainder returning to the original sponsor.
 
-This contract also allows cancellation and withdrawal from the event.
+This contract also allows cancellation and withdrawal from the event. In that case, the participant's initial sign-up fee is transferred to the receiving charity but any pledges are returned to the sponsor.
 
 Key Concepts
 ===
@@ -28,7 +28,7 @@ The organiser creates the event specifying the name, date, description and desig
 The Participant
 ---
 
-The person actually taking part in the event. This person signs up for the event and commits to taking part. They are given a unique URL which The Sponsor can use to pledge money.
+The person actually taking part in the event. This person signs up for the event and commits to taking part. They are given a unique URL which The Sponsor can use to pledge money. Participants are charged a sign-up fee.
 
 The Sponsor
 ---

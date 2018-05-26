@@ -1,0 +1,68 @@
+{{> head }}
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <h1 class="text-center">{{title}}</h1>
+    </div>
+    <div class="alert alert-light" id="status">Loading</div>
+    <div class="row">
+      <table>
+        <tr>
+          <th>Event</th>
+          <td id="showEventId">{{params.eventId}}</td>
+        </tr>
+        <tr>
+          <th>Event Name</th>
+          <td id="showEventName">…</td>
+        </tr>
+        <tr>
+          <th>Sign-up Fee</th>
+          <td id="showSignUpFee">…</td>
+        </tr>
+        <tr>
+          <th>Recipient Address</th>
+          <td id="showRecipientAddress">…</td>
+        </tr>
+        <tr>
+          <th>Recipient Name</th>
+          <td id="showRecipientName">…</td>
+        </tr>
+        <tr>
+          <th>OrganiserId</th>
+          <td id="showOrganiserId">…</td>
+        </tr>
+        <tr>
+          <th>Event Balance</th>
+          <td id="showEventBalance">…</td>
+        </tr>
+        <tr>
+          <th>Participant count</th>
+          <td id="showParticipantCount">…</td>
+        </tr>
+        <tr>
+          <th>Pledge count</th>
+          <td id="showPledgeCount">…</td>
+        </tr>
+        <tr>
+          <th>My Account</th>
+          <td id="myAccount">…</td>
+        </tr>
+        <tr>
+      </table>
+    </div>
+    <div class="row justify-content-center">
+      <ul class="nav nav-pills nav-fill">
+        <li><a class="nav-link active" href="/create">Create</a></li>
+        <li><a class="nav-link" href="/event/{{params.eventId}}/sign-up">Sign-Up</a></li>
+      </ul>
+    </div>
+  </div>
+  {{> scripts }}
+  <script>
+    App.onLoad = () => {
+        App.loadEvent("{{params.eventId}}")
+          .then(App.showEventDetails);
+    };
+  </script>
+
+{{> foot }}

@@ -35,7 +35,7 @@ contract SponsoredEvent is Ownable, Depositable {
   event CreateRecipient(address recipientAddress, string recipientName);
   event CreateEvent(string eventName, uint256 signUpFee);
   event SignUpEvent(address addr, uint256 value, uint participantId, string participantName);
-  event NewPledge(uint pledgeId, uint256 pledgeAmount, uint256 balance);
+  event NewPledge(uint pledgeId, address sponsorAddress, uint256 pledgeAmount, uint256 balance);
 
   // Maintain list of all sponsors so they can be refunded if the event is cancelled
   mapping(uint => Pledge) public pledgeIndex;
@@ -112,7 +112,7 @@ contract SponsoredEvent is Ownable, Depositable {
     // Add pledge to this SponsoredEvent's pledge list
     pledgeIndex[pledgeCount] = Pledge(msg.sender, msg.value, _participantId, _sponsorName);
 
-    emit NewPledge(pledgeCount, msg.value, totalBalance());
+    emit NewPledge(pledgeCount, msg.sender, msg.value, totalBalance());
 
     // Increase the number of pledges
     pledgeCount++;

@@ -1,0 +1,41 @@
+{{> head }}
+  <div class="container">
+    <div class="row justify-content-center">
+      <h1 class="text-center">{{title}}</h1>
+    </div>
+    <div class="alert alert-light" id="status"></div>
+    <div class="row">
+      <table>
+        <tr>
+          <th>Event Name</th>
+          <td><a href="/event/{{params.eventId}}" id="showEventName"></a></td>
+        </tr>
+        <tr>
+          <th>Recipient Name</th>
+          <td id="showRecipientName"></td>
+        </tr>
+        <tr>
+          <th>Participant Name</th>
+          <td id="showParticipantName"></td>
+        </tr>
+        <tr>
+          <th>Participant Address</th>
+          <td id="showParticipantAddress"></td>
+        </tr>
+      </table>
+    </div>
+    <div class="row justify-content-center">
+      <ul class="nav nav-pills nav-fill">
+        <li><a class="nav-link" href="/event/{{params.eventId}}/participant/{{params.participantId}}/pledge">Pledge</a></li>
+      </ul>
+    </div>
+  </div>
+{{> scripts }}
+  <script>
+    App.onLoad = () => {
+      return App.loadEvent("{{params.eventId}}")
+        .then(App.showEventDetails)
+        .then(() => App.showParticipantDetails({{params.participantId}}));
+    };
+  </script>
+{{> foot }}

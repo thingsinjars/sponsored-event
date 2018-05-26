@@ -1,8 +1,12 @@
+App = {};
 App = {
   web3Provider: null,
   contracts: {},
   sponsoredEvent: null,
   userAccount: null,
+  onLoad: () => {
+
+  },
 
   init: function() {
     return App.initWeb3();
@@ -22,7 +26,7 @@ App = {
   },
 
   initContract: function() {
-    $.getJSON('SponsoredEvent.json', function(data) {
+    $.getJSON('/contracts/SponsoredEvent.json', function(data) {
       // Get the necessary contract artifact file and instantiate it with truffle-contract
       var SponsoredEventArtifact = data;
       App.contracts.SponsoredEvent = TruffleContract(SponsoredEventArtifact);
@@ -49,25 +53,28 @@ App = {
     $(document).on('click', '#signUpButton', App.handleSignUp);
     $(document).on('click', '#loadParticipantButton', App.handleLoadParticipant);
     $(document).on('click', '#pledgeButton', App.handlePledge);
-    App.loadAccount()
+    return App.loadAccount()
       .then(accounts => {
         App.userAccount
         $('#myAccount').html(accounts[0]);
       });
-
-
   },
 
   watchEvent: function() {
-    var event = App.sponsoredEvent
-      .allEvents({ fromBlock: 0, toBlock: 'latest' })
-      .watch(function(error, result) {
-        if (error) {
-          console.error('Error: ' + error);
-        } else {
-          console.log('Event: ', result);
-        }
-      });
+    if (App.sponsoredEvent) {
+      var event = App.sponsoredEvent
+        .allEvents({
+          fromBlock: 0,
+          toBlock: 'latest'
+        })
+        .watch(function(error, result) {
+          if (error) {
+            console.error('Error: ' + error);
+          } else {
+            console.log('Event: ', result);
+          }
+        });
+    }
   },
 
   loadAccount: function() {
@@ -87,7 +94,10 @@ App = {
       const signUpFee = await App.sponsoredEvent.signUpFee();
       const eventName = await App.sponsoredEvent.eventName();
       const recipient = await App.sponsoredEvent.recipient();
-      const organiserName = await App.sponsoredEvent.owner();
+      const organiserId = await App.sponsoredEvent.owner();
+      const eventBalance = await App.sponsoredEvent.getContractBalance();
+      const registeredCount = await App.sponsoredEvent.registeredCount();
+      const pledgeCount = await App.sponsoredEvent.pledgeCount();
       const recipientName = recipient[0];
       const recipientAddress = recipient[1];
 
@@ -96,28 +106,24 @@ App = {
       $('#showEventName').html(eventName);
       $('#showRecipientAddress').html(recipientAddress);
       $('#showRecipientName').html(recipientName);
-      $('#showOrganiserName').html(organiserName);
+      $('#showOrganiserId').html(organiserId);
+      $('#showEventBalance').html(web3.fromWei(eventBalance, "ether").toNumber() + ' Ether');
+      $('#showParticipantCount').html(registeredCount.toNumber());
+      $('#showPledgeCount').html(pledgeCount.toNumber());
       $('#status').html('');
     } else {
       $('#status').html('No event found with that ID');
     }
+  },
 
+ showParticipantDetails: async function(participantId) {
+    if (App.sponsoredEvent) {
+      const participantAddress = await App.sponsoredEvent.participantsIndex(participantId);
+      const participantDetails = await App.sponsoredEvent.participants(participantAddress);
 
-    // var adoptionInstance;
-
-    // App.contracts.Adoption.deployed().then(function(instance) {
-    //   adoptionInstance = instance;
-
-    //   return adoptionInstance.getAdopters.call();
-    // }).then(function(adopters) {
-    //   for (i = 0; i < adopters.length; i++) {
-    //     if (adopters[i] !== '0x0000000000000000000000000000000000000000') {
-    //       $('.panel-pet').eq(i).find('button').text('Success').attr('disabled', true);
-    //     }
-    //   }
-    // }).catch(err => {
-    //   console.log(err.message);
-    // });
+      $('#showParticipantName').html(participantDetails[0]);
+      $('#showParticipantAddress').html(participantAddress);
+    }
   },
 
   loadEvent: (eventAddress) => {
@@ -165,12 +171,13 @@ App = {
           .then(eventAddress => {
             $('#createButton').html('Create').removeAttr('disabled');
             console.log('Address: ' + eventAddress);
-            App.loadEvent(eventAddress)
-              .then(sponsoredEvent => {
-                $('#status').html('');
-                App.watchEvent();
-                App.showEventDetails();
-              })
+            window.location = `/event/${eventAddress}`;
+            // App.loadEvent(eventAddress)
+            //   .then(sponsoredEvent => {
+            //     $('#status').html('');
+            //     App.watchEvent();
+            //     App.showEventDetails();
+            //   })
             return eventAddress;
           })
           .catch(function(err) {
@@ -215,7 +222,6 @@ App = {
           })
           // 
           .then(signUpTx => {
-            // debugger;
             return signUpTx;
           })
           .catch(err => {
@@ -227,10 +233,10 @@ App = {
       })
   },
 
-  handleLoadParticipant: async (event) => {
+  handleLoadParticipant: async(event) => {
     event.preventDefault();
     return App.loadEvent($('#signUpEventId').val())
-      .then(async () => {
+      .then(async() => {
         const participantAddress = await App.sponsoredEvent.participantsIndex(0);
         console.log(participantAddress);
         const participantDetails = await App.sponsoredEvent.participants(participantAddress);
@@ -278,6 +284,7 @@ App = {
 
 $(function() {
   $(window).load(function() {
-    App.init();
+    App.init()
+      .then(App.onLoad);
   });
 });

@@ -55,6 +55,17 @@ module.exports = [{
   }
 }, {
   method: 'GET',
+  path: '/event/{eventId}/participants',
+  handler: {
+    view: {
+      template: 'participants',
+      context: {
+        title: 'All participants'
+      }
+    }
+  }
+}, {
+  method: 'GET',
   path: '/event/{eventId}/participant/{participantId}',
   handler: {
     view: {
@@ -72,6 +83,17 @@ module.exports = [{
       template: 'pledge',
       context: {
         title: 'Sponsor a participant'
+      }
+    }
+  }
+}, {
+  method: 'GET',
+  path: '/admin/{eventId}/participants',
+  handler: {
+    view: {
+      template: 'admin-participants',
+      context: {
+        title: 'Admin participants'
       }
     }
   }

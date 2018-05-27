@@ -5,16 +5,16 @@
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="Manage sponsored events though smart contracts">
+    <meta name="author" content="Simon Madine">
 
-    <title>Sponsored Events</title>
+    <title>{{title}} – Sponsored Block</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="/css/heroic-features.css" rel="stylesheet">
+    <link href="/css/blog-post.css" rel="stylesheet">
 
   </head>
 
@@ -35,13 +35,13 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/about">About</a>
+              <a class="nav-link" href="#">About</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="https://github.com">Source</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/contact">Contact</a>
+              <a class="nav-link" href="#">Contact</a>
             </li>
           </ul>
         </div>
@@ -50,3 +50,21 @@
 
     <!-- Page Content -->
     <div class="container">
+
+      {{! Every view gets inserted here }}
+      {{{content}}}
+
+    </div>
+    <!-- /.container -->
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; Sponsored Block 2018</p>
+      </div>
+      <!-- /.container -->
+    </footer>
+
+  </body>
+
+</html>

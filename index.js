@@ -20,7 +20,9 @@ async function start() {
       },
       relativeTo: __dirname,
       path: 'public/templates',
-      partialsPath: 'public/templates/partials'
+      partialsPath: 'public/templates/partials',
+      layoutPath: 'public/templates/layout',
+      layout: 'default'
     });
     server.route(routes);
     await server.start();

@@ -1,53 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
+{{!< layout/hero }}
+      </div>
 
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-  <title>{{title}} – BlockWalk</title>
-  <!-- Bootstrap -->
-  <link href="/css/bootstrap.min.css" rel="stylesheet">
-  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-  <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-  <style>
-  .container {
-    max-width: 740px;
-  }
+      <!-- Jumbotron Header -->
+      <header class="jumbotron my-4">
+    <div class="container">
+        <h1 class="display-3">A Warm Welcome!</h1>
+        <p class="lead">Create and manage sponsored events through an Ethereum Smart Contract. Donations and sign-up fees are automatically kept in the contract until the event is over then they are transferred directly to the indended charity.</p>
+        <a href="/create" class="btn btn-primary btn-lg">Create an event</a>
+      </div>
+      </header>
+    <div class="container">
 
+      <!-- Page Features -->
+      <div class="row text-center">
 
-  form {
-    background: #00b3ff;
-    padding: 1em;
-    margin: 1em 0;
-  }
-  </style>
-</head>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="card">
+            <img class="card-img-top" src="http://placehold.it/500x325" alt="">
+            <div class="card-body">
+              <h4 class="card-title">Museum Marathon</h4>
+              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente esse necessitatibus neque.</p>
+            </div>
+            <div class="card-footer">
+              <a href="/event/0x88bcde71b81436d7b20aea9db6af1a601a52ea26" class="btn btn-primary">Find Out More!</a>
+            </div>
+          </div>
+        </div>
 
-<body>
-  <div class="container">
-    <div class="row justify-content-center">
-      <h1 class="text-center">Sponsored event</h1>
-    </div>
-    <div class="alert alert-light" id="status"></div>
-    <div class="row justify-content-center">
-      <ul class="nav nav-pills nav-fill">
-        <li><a class="nav-link active" href="/create">Create</a></li>
-      </ul>
-    </div>
-  </div>
-  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-  <script src="/js/jquery.min.js"></script>
-  <!-- Include all compiled plugins (below), or include individual files as needed -->
-  <script src="/js/bootstrap.min.js"></script>
-  <script src="/js/web3.min.js"></script>
-  <script src="/js/truffle-contract.js"></script>
-  <script src="/js/app.js"></script>
-</body>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="card">
+            <img class="card-img-top" src="http://placehold.it/500x325" alt="">
+            <div class="card-body">
+              <h4 class="card-title">Test Event</h4>
+              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Explicabo magni sapiente, tempore debitis beatae culpa natus architecto.</p>
+            </div>
+            <div class="card-footer">
+              <a href="/event/0x524b7bbb622d184a28b0de827264854a7e128451" class="btn btn-primary">Find Out More!</a>
+            </div>
+          </div>
+        </div>
 
-</html>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="card">
+            <img class="card-img-top" src="http://placehold.it/500x325" alt="">
+            <div class="card-body">
+              <h4 class="card-title">Card title</h4>
+              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente esse necessitatibus neque.</p>
+            </div>
+            <div class="card-footer">
+              <a href="#" class="btn btn-primary">Find Out More!</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="card">
+            <img class="card-img-top" src="http://placehold.it/500x325" alt="">
+            <div class="card-body">
+              <h4 class="card-title">Card title</h4>
+              <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Explicabo magni sapiente, tempore debitis beatae culpa natus architecto.</p>
+            </div>
+            <div class="card-footer">
+              <a href="#" class="btn btn-primary">Find Out More!</a>
+            </div>
+          </div>
+        </div>
+
+      </div>

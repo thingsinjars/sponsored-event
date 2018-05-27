@@ -1,36 +1,63 @@
-{{> head }}
-  <div class="container">
-    <div class="row justify-content-center">
-      <h1 class="text-center">{{title}}</h1>
-    </div>
-    <div class="alert alert-light" id="status"></div>
-    <div class="row justify-content-center">
-      <form class="w-100 text-light tab-pane active" id="createTab">
-        <h2>Create a sponsored event</h2>
+{{> page-head }}
+
+      <div class="row">
+
+        <!-- Post Content Column -->
+        <div class="col-lg-8">
+
+          <!-- Title -->
+          <h1 class="mt-4">{{title}}</h1>
+
+          <hr>
+
+      <form class="w-100">
         <div class="form-group">
           <label for="eventName">Event Name</label>
           <input type="text" class="form-control" id="eventName" value="Test Event">
-          <small id="eventNameHelp" class="form-text text-light">The public name of the sponsored event.</small>
+          <small id="eventNameHelp" class="form-text">The public name of the sponsored event.</small>
         </div>
         <div class="form-group">
           <label for="signUpFee">Sign-up fee</label>
           <input type="number" class="form-control" id="signUpFee" value="0.02">
-          <small id="signUpFeeHelp" class="form-text text-light">The non-refundable fee (in Ether) charged to participants when they sign-up. Can be zero.</small>
+          <small id="signUpFeeHelp" class="form-text">The non-refundable fee (in Ether) charged to participants when they sign-up. Can be zero.</small>
         </div>
         <div class="form-group">
           <label for="recipientAddress">Recipient Address</label>
           <input type="text" class="form-control" id="recipientAddress" placeholder="Enter recipient address" value="0xE42D257631e6AE69f2E2F52C432D3051d71eaa51">
-          <small id="recipientAddressHelp" class="form-text text-light">This is the account of the recipient where funds will be sent after the event.</small>
+          <small id="recipientAddressHelp" class="form-text">This is the account of the recipient where funds will be sent after the event.</small>
         </div>
         <div class="form-group">
           <label for="recipientName">Recipient Name</label>
           <input type="text" class="form-control" id="recipientName" placeholder="Enter recipient name" value="Test Recipient Name">
-          <small id="recipientNameHelp" class="form-text text-light">The public name of the recipient.</small>
+          <small id="recipientNameHelp" class="form-text">The public name of the recipient.</small>
         </div>
         <button type="submit" class="btn btn-light" id="createButton">Create</button>
       </form>
-    </div>
-  </div>
-  {{> scripts }}
 
-{{> foot }}
+          <hr>
+
+
+        </div>
+
+        <!-- Sidebar Widgets Column -->
+        <div class="col-md-4">
+
+          {{> account }}
+
+          {{> search }}
+
+          {{> categories }}
+
+          <!-- Side Widget -->
+          <div class="card my-4">
+            <h5 class="card-header">Side Widget</h5>
+            <div class="card-body">
+              You can put anything you want inside of these side widgets. They are easy to use, and feature the new Bootstrap 4 card containers!
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      <!-- /.row -->
+  {{> scripts }}

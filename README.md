@@ -7,6 +7,14 @@ No more chasing people for money after the event. No need to worry about how or 
 
 This contract also allows cancellation and withdrawal from the event. In that case, the participant's initial sign-up fee is transferred to the receiving charity but any pledges are returned to the sponsor.
 
+Additional information about the event (description, title, images) should be stored off-chain in another database.
+
+Web UI
+===
+
+Templates from: https://startbootstrap.com/template-categories/all/
+
+
 Key Concepts
 ===
 
@@ -96,3 +104,4 @@ After starting and connecting MetaMask, reset the account in Metamask
 Start Truffle:
 
     truffle console --network development
+

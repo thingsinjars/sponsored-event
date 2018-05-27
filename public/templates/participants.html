@@ -6,11 +6,12 @@
         <div class="col-lg-8">
 
           <!-- Title -->
-          <h1 class="mt-4 showParticipantName">…</h1>
+          <h1 class="mt-4"><span class="showEventName"></span> participants</h1>
 
           <!-- Author -->
           <p class="lead">
-            is taking part in <a href="/event/{{params.eventId}}" class="showEventName">…</a>
+            by
+            <a href="#">Start Bootstrap</a>
           </p>
 
           <hr>
@@ -26,31 +27,16 @@
           <hr>
 
           <div class="alert alert-light" id="status"></div>
-          <table>
-            <tr>
-              <th>Event Name</th>
-              <td><a href="/event/{{params.eventId}}" class="showEventName"></a></td>
-            </tr>
-            <tr>
-              <th>Recipient Name</th>
-              <td class="" ="showRecipientName"></td>
-            </tr>
-            <tr>
-              <th>Participant Name</th>
-              <td class="showParticipantName"></td>
-            </tr>
-            <tr>
-              <th>Participant Address</th>
-              <td class="showParticipantAddress"></td>
-            </tr>
-          </table>
-          <div class="row justify-content-center">
-            <ul class="nav nav-pills nav-fill">
-              <li><a class="nav-link" href="/event/{{params.eventId}}/participant/{{params.participantId}}/pledge">Pledge to <span class="showParticipantName"></span></a></li>
-            </ul>
+          <div class="row">
+            <ul id="participantList"></ul>
           </div>
 
           <hr>
+    <div class="row justify-content-center">
+      <ul class="nav nav-pills nav-fill">
+        <li><a class="nav-link" href="/event/{{params.eventId}}">Event details</a></li>
+      </ul>
+    </div>
 
 
         </div>
@@ -79,6 +65,6 @@
     App.onLoad = () => {
       return App.loadEvent("{{params.eventId}}")
         .then(App.showEventDetails)
-        .then(() => App.showParticipantDetails({{params.participantId}}));
+        .then(App.showAllParticipants);
     };
   </script>

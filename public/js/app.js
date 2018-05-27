@@ -56,7 +56,7 @@ App = {
     return App.loadAccount()
       .then(accounts => {
         App.userAccount
-        $('#myAccount').html(accounts[0]);
+        $('.myAccount').html(accounts[0]);
       });
   },
 
@@ -103,11 +103,11 @@ App = {
 
       $('#showEventId').html(eventAddress);
       $('#showSignUpFee').html(web3.fromWei(signUpFee, 'ether').toNumber() + ' Ether');
-      $('#showEventName').html(eventName);
+      $('.showEventName').html(eventName);
       $('#showRecipientAddress').html(recipientAddress);
-      $('#showRecipientName').html(recipientName);
+      $('.showRecipientName').html(recipientName);
       $('#showOrganiserId').html(organiserId);
-      $('#showEventBalance').html(web3.fromWei(eventBalance, "ether").toNumber() + ' Ether');
+      $('.showEventBalance').html(web3.fromWei(eventBalance, "ether").toNumber() + ' Ether');
       $('#showParticipantCount').html(registeredCount.toNumber());
       $('#showPledgeCount').html(pledgeCount.toNumber());
       $('#status').html('');
@@ -116,13 +116,26 @@ App = {
     }
   },
 
- showParticipantDetails: async function(participantId) {
+  showAllParticipants: async function() {
+    if (App.sponsoredEvent) {
+      const count = (await App.sponsoredEvent.registeredCount()).toNumber();
+      const list = $('#participantList');
+      for(let i = 0; i < count; i++) {
+        const participantAddress = await App.sponsoredEvent.participantsIndex(i);
+        const participantDetails = await App.sponsoredEvent.participants(participantAddress);
+
+        list.append(`<li><a href="participant/${i}">${participantDetails[0]}</a></li>`);
+      }
+    }
+  },
+
+  showParticipantDetails: async function(participantId) {
     if (App.sponsoredEvent) {
       const participantAddress = await App.sponsoredEvent.participantsIndex(participantId);
       const participantDetails = await App.sponsoredEvent.participants(participantAddress);
 
-      $('#showParticipantName').html(participantDetails[0]);
-      $('#showParticipantAddress').html(participantAddress);
+      $('.showParticipantName').html(participantDetails[0]);
+      $('.showParticipantAddress').html(participantAddress);
     }
   },
 
@@ -282,9 +295,7 @@ App = {
 
 };
 
-$(function() {
-  $(window).load(function() {
-    App.init()
-      .then(App.onLoad);
-  });
-});
+$(window).on("load", function() {
+  App.init()
+    .then(App.onLoad);
+})

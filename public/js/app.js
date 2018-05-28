@@ -26,7 +26,8 @@ App = {
   },
 
   initContract: function() {
-    return $.getJSON('/contracts/SponsoredEvent.json', function(data) {
+    return $.getJSON('/contracts/SponsoredEvent.json')
+      .then((data) => {
         // Get the necessary contract artifact file and instantiate it with truffle-contract
         var SponsoredEventArtifact = data;
         App.contracts.SponsoredEvent = TruffleContract(SponsoredEventArtifact);
@@ -128,9 +129,9 @@ App = {
         const participantDetails = await App.sponsoredEvent.participants(participantAddress);
 
         list.append(`<li><a href="participant/${i}">${participantDetails[0]}</a></li>`);
-        if(participantDetails[2]) {
+        if (participantDetails[2]) {
           // participant has already completed
-          formList.append(`<div class="checkbox"> <label> <input type="checkbox" class="check" disabled="disabled" name="participants"> ${participantDetails[0]} (completed)</label> </div>`);          
+          formList.append(`<div class="checkbox"> <label> <input type="checkbox" class="check" disabled="disabled" name="participants"> ${participantDetails[0]} (completed)</label> </div>`);
         } else {
           formList.append(`<div class="checkbox"> <label> <input type="checkbox" class="check" name="participants" value="${i}"> ${participantDetails[0]}</label> </div>`);
         }
@@ -141,7 +142,7 @@ App = {
     }
   },
 
-  showParticipantDetails: async (participantId) => {
+  showParticipantDetails: async(participantId) => {
     if (App.sponsoredEvent) {
       const participantAddress = await App.sponsoredEvent.participantsIndex(participantId);
       const participantDetails = await App.sponsoredEvent.participants(participantAddress);
@@ -151,16 +152,16 @@ App = {
     }
   },
 
-  loadEvent: async (eventAddress) => {
+  loadEvent: async(eventAddress) => {
     try {
       App.sponsoredEvent = await App.contracts.SponsoredEvent.at(eventAddress);
       return App.sponsoredEvent;
-    } catch(err) {
+    } catch (err) {
       console.log(err.message);
     }
   },
 
-  handleLoad: async (event) => {
+  handleLoad: async(event) => {
     event.preventDefault();
     await App.loadEvent($('#eventId').val());
     App.watchEvent();

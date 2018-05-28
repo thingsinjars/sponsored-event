@@ -11,6 +11,8 @@ contract SponsoredEvent is Ownable, Depositable {
   Recipient public recipient;
   uint public registeredCount = 0;
   uint public pledgeCount = 0;
+  bool public ended = false;
+  bool public cancelled = false;
 
   struct Recipient {
     string recipientName;
@@ -36,6 +38,7 @@ contract SponsoredEvent is Ownable, Depositable {
   event CreateEvent(string eventName, uint256 signUpFee);
   event SignUpEvent(address addr, uint256 value, uint participantId, string participantName);
   event NewPledge(uint pledgeId, address sponsorAddress, uint256 pledgeAmount, uint256 balance);
+  event ParticipantCompletedEvent(uint participantId);
 
   // Maintain list of all sponsors so they can be refunded if the event is cancelled
   mapping(uint => Pledge) public pledgeIndex;
@@ -43,6 +46,17 @@ contract SponsoredEvent is Ownable, Depositable {
   // Participant[] public participants;
   mapping (address => Participant) public participants;
   mapping (uint => address) public participantsIndex;
+
+  /* Modifiers */
+  modifier onlyActive {
+    require(!ended);
+    _;
+  }
+
+  modifier onlyEnded {
+    require(ended);
+    _;
+  }
 
   /**
    * Each SponsoredEvent contract has:
@@ -92,22 +106,9 @@ contract SponsoredEvent is Ownable, Depositable {
     return registeredCount;
   }
 
-  /* Helper */
-  function totalBalance() constant public returns (uint256){
-    return address(this).balance;
-  }
-
-  function isRegistered(address _addr) constant public returns (bool){
-    return participants[_addr].participantAddress != address(0);
-  }
-
-  // At the end of the event, transfer the signup fee from the participant
-  // and the pledge from each participant's sponsors
-  // to the recipient
-    // recipient.addr.transfer(payoutAmount);
-
-
-
+  /**
+   * Transfer money from the sponsor to the contract
+   */
   function pledge(uint _participantId, string _sponsorName) public payable {
     // Add pledge to this SponsoredEvent's pledge list
     pledgeIndex[pledgeCount] = Pledge(msg.sender, msg.value, _participantId, _sponsorName);
@@ -117,6 +118,48 @@ contract SponsoredEvent is Ownable, Depositable {
     // Increase the number of pledges
     pledgeCount++;
   }
+
+  /**
+   * Mark the participant as having completed the event
+   * 
+   * For the moment, just go with 100% completion
+   */
+  function participantCompleted(uint[] _participantIds) external onlyOwner onlyActive {
+    for (uint i=0; i < _participantIds.length; i++) {
+      address _addr = participantsIndex[_participantIds[i]];
+      require(isRegistered(_addr));
+      require(!hasCompleted(_addr));
+      emit ParticipantCompletedEvent(_addr);
+      participants[_addr].percentComplete = 100;
+    }
+  }
+
+  /**
+   * Cancel the event
+   * 
+   * Transfer all the pledged money back to the sponsors
+   * Transfer the sign-up fee back to the participant
+   */
+  function cancelEvent() public onlyOwner onlyActive {
+  }
+
+  /* Helper */
+  function totalBalance() constant public returns (uint256){
+    return address(this).balance;
+  }
+
+  function isRegistered(address _addr) constant public returns (bool) {
+    return participants[_addr].participantAddress != address(0);
+  }
+
+  function hasCompleted(address _addr) constant public returns (bool) {
+    return isRegistered(_addr) && participants[_addr].percentComplete == 100;
+  }
+
+  // At the end of the event, transfer the signup fee from the participant
+  // and the pledge from each participant's sponsors
+  // to the recipient
+
 
 //   // for this event, get list of sponsorships
 

@@ -84,9 +84,9 @@
       <!-- /.row -->
 {{> scripts }}
   <script>
-    App.onLoad = () => {
-      return App.loadEvent("{{params.eventId}}")
-        .then(App.showEventDetails)
-        .then(App.showAllParticipants);
-    };
+  App.onLoad = () => {
+    return App.loadEvent("{{params.eventId}}")
+      .then(App.showEventDetails)
+      .then(() => App.showParticipantDetails({{params.participantId}}));
+  };
   </script>

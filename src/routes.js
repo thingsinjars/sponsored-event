@@ -49,7 +49,7 @@ module.exports = [{
     view: {
       template: 'sign-up',
       context: {
-        title: 'Sign up for event'
+        title: 'Sign up for this event'
       }
     }
   }

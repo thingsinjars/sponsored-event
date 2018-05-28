@@ -183,7 +183,6 @@ App = {
           })
           .then(eventAddress => {
             $('#createButton').html('Create').removeAttr('disabled');
-            console.log('Address: ' + eventAddress);
             window.location = `/event/${eventAddress}`;
             // App.loadEvent(eventAddress)
             //   .then(sponsoredEvent => {
@@ -282,6 +281,7 @@ App = {
           .then(signUpTx => {
             $('#status').html('');
             $('#pledgeButton').html('Pledge').removeAttr('disabled');
+            window.location = `/event/${App.sponsoredEvent.address}`;
             return signUpTx;
           })
           .catch(err => {

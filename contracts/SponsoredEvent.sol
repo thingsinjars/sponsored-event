@@ -29,7 +29,7 @@ contract SponsoredEvent is Ownable, Depositable {
   struct Participant {
     string participantName;
     address participantAddress;
-    uint8 percentComplete;
+    bool completed;
     bool finalized;
   }
 
@@ -95,7 +95,7 @@ contract SponsoredEvent is Ownable, Depositable {
 
     // Create lookups
     participantsIndex[registeredCount] = msg.sender;
-    participants[msg.sender] = Participant(_participantName, msg.sender, 0, false);
+    participants[msg.sender] = Participant(_participantName, msg.sender, false, false);
 
     emit SignUpEvent(msg.sender, msg.value, registeredCount, _participantName);
 
@@ -122,15 +122,15 @@ contract SponsoredEvent is Ownable, Depositable {
   /**
    * Mark the participant as having completed the event
    * 
-   * For the moment, just go with 100% completion
+   * This version doesn't allow partial completion
    */
   function participantCompleted(uint[] _participantIds) external onlyOwner onlyActive {
     for (uint i=0; i < _participantIds.length; i++) {
       address _addr = participantsIndex[_participantIds[i]];
       require(isRegistered(_addr));
       require(!hasCompleted(_addr));
-      emit ParticipantCompletedEvent(_addr);
-      participants[_addr].percentComplete = 100;
+      participants[_addr].completed = true;
+      emit ParticipantCompletedEvent(i);
     }
   }
 
@@ -140,8 +140,8 @@ contract SponsoredEvent is Ownable, Depositable {
    * Transfer all the pledged money back to the sponsors
    * Transfer the sign-up fee back to the participant
    */
-  function cancelEvent() public onlyOwner onlyActive {
-  }
+  // function cancelEvent() public onlyOwner onlyActive {
+  // }
 
   /* Helper */
   function totalBalance() constant public returns (uint256){
@@ -153,70 +153,7 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   function hasCompleted(address _addr) constant public returns (bool) {
-    return isRegistered(_addr) && participants[_addr].percentComplete == 100;
+    return isRegistered(_addr) && participants[_addr].completed;
   }
 
-  // At the end of the event, transfer the signup fee from the participant
-  // and the pledge from each participant's sponsors
-  // to the recipient
-
-
-//   // for this event, get list of sponsorships
-
-//   // for this event, get list of participants
-//   // for a participant, get list of sponsorships
-
-//   struct Event {
-//     string name;
-//     address recipientAddress;
-//     address recipientName;
-//   }
-
-
-//   struct Participant {
-//     string participantName;
-//     address participantAddress;
-//     uint8 percentComplete
-//     bool finalized;
-//   }
-
-
-
-//   mapping (address => Participant) public participants;
-//   mapping (uint => address) public participantsIndex;
-
-
-// Sponsor
-//   name
-//   address
-//   pledgeAmount
-//   givenAmount
-//   refunded
-
-//   mapping (uint => address) public eventToRecipient;
-
-//   function _createEvent(string _name, uint _startTime, uint _endTime, address _recipient) internal
-
-//   string public name;
-//   uint public startTime;
-//   uint private endTime;
-
-
-
-//   address[16] public adopters;
-
-//   // Adopting a pet
-//   function adopt(uint petId) public returns (uint) {
-//     require(petId >= 0 && petId <= 15);
-
-//     adopters[petId] = msg.sender;
-
-//     return petId;
-//   }
-
-//   // Retrieving the adopters
-//   function getAdopters() public view returns (address[16]) {
-//     return adopters;
-//   }
 }
-

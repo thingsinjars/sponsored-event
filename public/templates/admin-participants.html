@@ -6,20 +6,34 @@
   <div class="col-lg-8">
 
     <!-- Title -->
-    <h1 class="mt-4">Admin <span class="showEventName"></span> participants</h1>
+    <h1 class="mt-4">Admin participants</h1>
 
     <!-- Author -->
     <p class="lead">
-      Admin page
+      for
+      <a href="/event/{{params.eventId}}" class="showEventName"></a>
     </p>
 
     <hr>
 
     <div class="alert alert-light" id="status"></div>
-    <div class="row">
-      <ul id="participantList"></ul>
-    </div>
+    <div class="check-row">
+      <form role="form">
+        <input type="hidden" class="form-control" id="eventId" value="{{params.eventId}}">
+        <div class="form-group">
 
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" class="check" id="checkAll"> Check All
+            </label>
+          </div>
+
+          <div id="participantFormList">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="completeButton">Mark complete</button>
+      </form>
+    </div>
     <hr>
     <div class="row justify-content-center">
       <ul class="nav nav-pills nav-fill">
@@ -34,6 +48,7 @@
   <div class="col-md-4">
 
     {{> account }}
+    {{> admin }}
 
   </div>
 

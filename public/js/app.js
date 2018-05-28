@@ -26,25 +26,26 @@ App = {
   },
 
   initContract: function() {
-    $.getJSON('/contracts/SponsoredEvent.json', function(data) {
-      // Get the necessary contract artifact file and instantiate it with truffle-contract
-      var SponsoredEventArtifact = data;
-      App.contracts.SponsoredEvent = TruffleContract(SponsoredEventArtifact);
+    return $.getJSON('/contracts/SponsoredEvent.json', function(data) {
+        // Get the necessary contract artifact file and instantiate it with truffle-contract
+        var SponsoredEventArtifact = data;
+        App.contracts.SponsoredEvent = TruffleContract(SponsoredEventArtifact);
 
-      // Set the provider for our contract
-      App.contracts.SponsoredEvent.setProvider(App.web3Provider);
-    });
+        // Set the provider for our contract
+        App.contracts.SponsoredEvent.setProvider(App.web3Provider);
+      })
+      .then(() => {
+        // Load Gas Price
+        // App.gasPrice = web3.toWei(3, 'gwei');
+        // $.get('https://ethgasstation.info/json/ethgasAPI.json', function(res) {
+        //   App.gasPrice = web3.toWei(res.safeLow / 10, 'gwei'); // for some reason the gas price is 10 times more expensive the one displayed on the web page.
+        // })
+        web3.eth.getGasPrice((err, value) => {
+          App.gasPrice = value.toString();
+        })
 
-    // Load Gas Price
-    // App.gasPrice = web3.toWei(3, 'gwei');
-    // $.get('https://ethgasstation.info/json/ethgasAPI.json', function(res) {
-    //   App.gasPrice = web3.toWei(res.safeLow / 10, 'gwei'); // for some reason the gas price is 10 times more expensive the one displayed on the web page.
-    // })
-    web3.eth.getGasPrice((err, value) => {
-      App.gasPrice = value.toString();
-    })
-
-    return App.bindEvents();
+      })
+      .then(App.bindEvents);
   },
 
   bindEvents: function() {
@@ -53,6 +54,7 @@ App = {
     $(document).on('click', '#signUpButton', App.handleSignUp);
     $(document).on('click', '#loadParticipantButton', App.handleLoadParticipant);
     $(document).on('click', '#pledgeButton', App.handlePledge);
+    $(document).on('click', '#completeButton', App.handleComplete);
     return App.loadAccount()
       .then(accounts => {
         App.userAccount
@@ -120,16 +122,26 @@ App = {
     if (App.sponsoredEvent) {
       const count = (await App.sponsoredEvent.registeredCount()).toNumber();
       const list = $('#participantList');
-      for(let i = 0; i < count; i++) {
+      const formList = $('#participantFormList');
+      for (let i = 0; i < count; i++) {
         const participantAddress = await App.sponsoredEvent.participantsIndex(i);
         const participantDetails = await App.sponsoredEvent.participants(participantAddress);
 
         list.append(`<li><a href="participant/${i}">${participantDetails[0]}</a></li>`);
+        if(participantDetails[2]) {
+          // participant has already completed
+          formList.append(`<div class="checkbox"> <label> <input type="checkbox" class="check" disabled="disabled" name="participants"> ${participantDetails[0]} (completed)</label> </div>`);          
+        } else {
+          formList.append(`<div class="checkbox"> <label> <input type="checkbox" class="check" name="participants" value="${i}"> ${participantDetails[0]}</label> </div>`);
+        }
       }
+      $("#checkAll").click(function() {
+        $(".check").prop('checked', $(this).prop('checked'));
+      });
     }
   },
 
-  showParticipantDetails: async function(participantId) {
+  showParticipantDetails: async (participantId) => {
     if (App.sponsoredEvent) {
       const participantAddress = await App.sponsoredEvent.participantsIndex(participantId);
       const participantDetails = await App.sponsoredEvent.participants(participantAddress);
@@ -139,25 +151,20 @@ App = {
     }
   },
 
-  loadEvent: (eventAddress) => {
-    return App.contracts.SponsoredEvent.at(eventAddress)
-      .then((instance) => {
-        App.sponsoredEvent = instance;
-        return App.sponsoredEvent;
-      })
-      .catch(err => {
-        console.log(err.message);
-      });
+  loadEvent: async (eventAddress) => {
+    try {
+      App.sponsoredEvent = await App.contracts.SponsoredEvent.at(eventAddress);
+      return App.sponsoredEvent;
+    } catch(err) {
+      console.log(err.message);
+    }
   },
 
-  handleLoad: function(event) {
+  handleLoad: async (event) => {
     event.preventDefault();
-    return App.loadEvent($('#eventId').val())
-      .then(sponsoredEvent => {
-        App.watchEvent();
-        App.showEventDetails();
-      })
-
+    await App.loadEvent($('#eventId').val());
+    App.watchEvent();
+    App.showEventDetails();
   },
 
   handleCreate: function(event) {
@@ -208,53 +215,39 @@ App = {
 
   handleSignUp: async(event) => {
     event.preventDefault();
-    const signUpFee = await App.sponsoredEvent.signUpFee();
-    return App.loadEvent($('#signUpEventId').val())
-      .then(sponsoredEvent => {
-        const participantName = $('#participantName').val();
-        App.loadAccount()
-          .then(accounts => accounts[0])
-          .then(account => {
-            console.log(
-              participantName, {
-                from: account,
-                value: signUpFee,
-                gas: 6721975,
-                gasPrice: App.gasPrice
-              })
-            return sponsoredEvent.signUpForEvent(
-              participantName, {
-                from: account,
-                value: signUpFee,
-                gas: 6721975,
-                gasPrice: App.gasPrice
-              }
-            )
 
-          })
-          // 
-          .then(signUpTx => {
-            return signUpTx;
-          })
-          .catch(err => {
-            console.log(err.message);
-          });
-      })
-      .catch(err => {
-        console.log(err.message);
-      })
+    try {
+      await App.loadEvent($('#signUpEventId').val())
+      const signUpFee = await App.sponsoredEvent.signUpFee();
+      const sponsoredEvent = await App.loadEvent($('#signUpEventId').val());
+      const participantName = $('#participantName').val();
+      const account = await App.loadAccount().then(accounts => accounts[0]);
+
+      const tx = sponsoredEvent.signUpForEvent(
+        participantName, {
+          from: account,
+          value: signUpFee,
+          gas: 6721975,
+          gasPrice: App.gasPrice
+        }
+      );
+
+    } catch (err) {
+      console.log(err.message);
+    }
   },
 
   handleLoadParticipant: async(event) => {
     event.preventDefault();
-    return App.loadEvent($('#signUpEventId').val())
-      .then(async() => {
-        const participantAddress = await App.sponsoredEvent.participantsIndex(0);
-        console.log(participantAddress);
-        const participantDetails = await App.sponsoredEvent.participants(participantAddress);
-        console.log(participantDetails);
-        return participantAddress;
-      })
+    await App.loadEvent($('#signUpEventId').val())
+
+    const participantAddress = await App.sponsoredEvent.participantsIndex(0);
+    console.log(participantAddress);
+
+    const participantDetails = await App.sponsoredEvent.participants(participantAddress);
+    console.log(participantDetails);
+
+    return participantAddress;
   },
 
   handlePledge: async(event) => {
@@ -291,6 +284,42 @@ App = {
       .catch(err => {
         console.log(err.message);
       })
+  },
+
+  handleComplete: async(event) => {
+    event.preventDefault();
+    const organiserId = await App.sponsoredEvent.owner();
+    const myAccount = await App.loadAccount().then(accounts => accounts[0]);
+    if (organiserId !== myAccount) {
+      $('#status').html('Not the organiser of this event');
+      return;
+    }
+
+    $('#status').html('Marking');
+    $('#completeButton').html('Marking').attr('disabled', 'disabled');
+
+    var participantIds = $("#participantFormList input:checkbox:checked").map(function() {
+      return $(this).val();
+    }).get();
+
+    const sponsoredEvent = await App.loadEvent($('#eventId').val());
+
+    const tx = await sponsoredEvent.participantCompleted(participantIds, {
+      gas: 6721975,
+      gasPrice: App.gasPrice
+    });
+
+    $('#status').html('');
+    $('#completeButton').html('Mark complete').removeAttr('disabled');
+
+    //   // $('#status').html('');
+    //   // $('#pledgeButton').html('Pledge').removeAttr('disabled');
+    //   // window.location = `/event/${App.sponsoredEvent.address}`;
+    //   return signUpTx;
+    // })
+    // .catch(err => {
+    //   console.log(err.message);
+    // })
   }
 
 };

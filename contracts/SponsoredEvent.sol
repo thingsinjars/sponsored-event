@@ -1,3 +1,9 @@
+/**
+ * @title SponsoredEvent
+ * @author Simon Madine
+ * @notice
+ */
+
 pragma solidity ^0.4.21;
 
 import './Depositable.sol';
@@ -50,11 +56,11 @@ contract SponsoredEvent is Ownable, Depositable {
   event NewPledge(uint pledgeId, address sponsorAddress, uint256 pledgeAmount, uint256 balance);
   event ParticipantCompletedEvent(uint participantId);
   event RecipientTransfer(address addr, uint256 pledgeAmount);
-  event WithdrawEvent(address addr, bool return, uint256 pledgeAmount);
+  event WithdrawEvent(address addr, bool returned, uint256 pledgeAmount);
+  event Closure(uint256 finalAmount);
 
   // Maintain list of all sponsors so they can be refunded if the event is cancelled
-  mapping(address => Pledge) public pledges;
-  mapping(uint => address) public pledgeIndex;
+  mapping(uint => Pledge) public pledges;
 
   // Participant[] public participants;
   mapping (address => Participant) public participants;
@@ -112,7 +118,6 @@ contract SponsoredEvent is Ownable, Depositable {
    * the minimum sign-up fee
    *
    * @param _participantName Public name of the event participant
-   * @returns uint
    */
   function signUpForEvent(string _participantName) public payable returns (uint) {
 
@@ -141,14 +146,13 @@ contract SponsoredEvent is Ownable, Depositable {
   /**
    * @dev Transfer money from the sponsor to the contract
    *
-   * @params _participantId Index of the participant in the participantIndex
-   * @params _sponsorName Public name of the sponsor
+   * @param _participantId Index of the participant in the participantIndex
+   * @param _sponsorName Public name of the sponsor
    */
   function pledge(uint _participantId, string _sponsorName) public payable {
 
     // Add a pledge to this SponsoredEvent's pledge list
-    pledgeIndex[pledgeCount] = msg.sender;
-    pledges[msg.sender] = Pledge(msg.sender, msg.value, _participantId, _sponsorName, false);
+    pledges[pledgeCount] = Pledge(msg.sender, msg.value, _participantId, _sponsorName, false);
 
     emit NewPledge(pledgeCount, msg.sender, msg.value, getContractBalance());
 
@@ -161,9 +165,10 @@ contract SponsoredEvent is Ownable, Depositable {
    *
    * NOTE: This version doesn't allow partial completion
    *
-   * @param _participantIds[] Array of participants who have completed the event
-   * @modifier onlyOwner Only the organiser of this event may call this
-   * @modifier onlyActive Only events that have not ended
+   * modifier: onlyOwner Only the organiser of this event may call this
+   * modifier: onlyActive Only events that have not ended
+   *
+   * @param _participantIds Array of participants who have completed the event
    */
   function participantCompleted(uint[] _participantIds) external onlyOwner onlyActive {
     for (uint i=0; i < _participantIds.length; i++) {
@@ -180,8 +185,8 @@ contract SponsoredEvent is Ownable, Depositable {
    *  - Transfer valid funds and sign-up fees to recipient
    *  - Mark this event as ended
    *
-   * @modifier onlyOwner Only the organiser of this event may call this
-   * @modifier onlyActive Only events that have not ended
+   * modifier: onlyOwner Only the organiser of this event may call this
+   * modifier: onlyActive Only events that have not ended
    */
   function endEvent() external onlyOwner onlyActive {
     transferToRecipient();
@@ -196,23 +201,24 @@ contract SponsoredEvent is Ownable, Depositable {
    *    to the intended recipient and end the event.
    *  - Mark the event as ended
    *
-   * @modifier onlyOwner Only the organiser of this event may call this
-   * @modifier onlyActive Only events that have not ended
+   * modifier: onlyOwner Only the organiser of this event may call this
+   * modifier: onlyActive Only events that have not ended
    */
   function transferToRecipient() internal onlyOwner onlyActive {
     uint256 transferAmount = 0;
-    for (uint i = 0; i < pledgeIndex.length; i++) {
-      Pledge pledge = pledgeIndex[i];
+    for (uint i = 0; i < pledgeCount; i++) {
+      // Pledge storage thisPledge = pledges[pledgeIndex[i]];
+      Pledge storage thisPledge = pledges[i];
 
       // This pledge hasn't been paid yet
-      if(!pledge.paid) {
+      if(!thisPledge.paid) {
         // If this participant has completed the event
-        address participantAddress = participantsIndex[pledge.participantId];
+        address participantAddress = participantsIndex[thisPledge.participantId];
         if(hasCompleted(participantAddress)) {
-          transferAmount += pledge.pledgeAmount;
-          pledge.paid = true;
+          transferAmount += thisPledge.pledgeAmount;
+          thisPledge.paid = true;
 
-          participants[_addr].completed = true;
+          participants[participantAddress].completed = true;
 
           // Also include the signup fee from each participant
           transferAmount += signUpFee;
@@ -220,9 +226,9 @@ contract SponsoredEvent is Ownable, Depositable {
       }
     }
 
-    recipient.recipientAddress.transfer(pledgeAmount);
+    recipient.recipientAddress.transfer(transferAmount);
 
-    emit RecipientTransfer(recipient.recipientAddress, pledgeAmount);
+    emit RecipientTransfer(recipient.recipientAddress, transferAmount);
   }
 
   /**
@@ -232,35 +238,37 @@ contract SponsoredEvent is Ownable, Depositable {
    * complete the event, the sponsor can reclaim the pledge
    * or send it to the recipient anyway
    *
+   * modifier: onlyEnded This event must have passed
+   * modifier: onlyUnclosed This contract is still open
+   *
    * @param _returnPledge Should this be returned to the sponsor?
-   * @modifier onlyEnded This event must have passed
-   * @modifier onlyUnclosed This contract is still open
    */
-  function sponsorReclaim(bool _returnPledge) external onlyEnded onlyUnclosed {
-    Pledge pledge = pledges[msg.sender];
+  function sponsorReclaim(uint pledgeId, bool _returnPledge) external onlyEnded onlyUnclosed {
+    Pledge storage thisPledge = pledges[pledgeId];
 
     // This can only be called by the original sponsor
-    require(pledge.sponsorAddress == msg.sender);
+    require(thisPledge.sponsorAddress == msg.sender);
 
     // Only if the pledge hasn't already been paid
-    require(!pledge.paid);
+    require(!thisPledge.paid);
 
-    Participant participant = participants[pledge.participantAddress];
+    address participantAddress = participantsIndex[thisPledge.participantId];
+    Participant memory participant = participants[participantAddress];
 
     // If the participant didn't complete
     require(!participant.completed);
 
     // Mark this pledge as paid
-    pledge.paid = true;
+    thisPledge.paid = true;
 
     if(_returnPledge) {
       // Return it to the sponsor
-      pledge.sponsorAddress.transfer(pledge.pledgeAmount);
+      thisPledge.sponsorAddress.transfer(thisPledge.pledgeAmount);
     } else {
       // Forward to the recipient
-      recipient.recipientAddress.transfer(pledge.pledgeAmount);
+      recipient.recipientAddress.transfer(thisPledge.pledgeAmount);
     }
-    emit WithdrawEvent(msg.sender, _returnPledge, pledge.pledgeAmount);
+    emit WithdrawEvent(msg.sender, _returnPledge, thisPledge.pledgeAmount);
   }
 
   /**
@@ -270,8 +278,8 @@ contract SponsoredEvent is Ownable, Depositable {
    * will be transferred to the recipient regardless of the
    * participant's completion status
    * 
-   * @modifier onlyEnded This event must have passed
-   * @modifier onlyUnclosed This contract is still open
+   * modifier: onlyEnded This event must have passed
+   * modifier: onlyUnclosed This contract is still open
    */
   function closeEvent() public onlyOwner onlyEnded onlyUnclosed {
     uint256 finalPayout = getContractBalance();

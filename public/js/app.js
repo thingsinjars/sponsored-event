@@ -131,7 +131,7 @@ App = {
         list.append(`<li><a href="participant/${i}">${participantDetails[0]}</a></li>`);
         if (participantDetails[2]) {
           // participant has already completed
-          formList.append(`<div class="checkbox"> <label> <input type="checkbox" class="check" disabled="disabled" name="participants"> ${participantDetails[0]} (completed)</label> </div>`);
+          formList.append(`<div class="checkbox"> <label> <input type="checkbox" disabled="disabled" name="participants"> ${participantDetails[0]} (completed)</label> </div>`);
         } else {
           formList.append(`<div class="checkbox"> <label> <input type="checkbox" class="check" name="participants" value="${i}"> ${participantDetails[0]}</label> </div>`);
         }

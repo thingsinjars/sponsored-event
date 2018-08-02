@@ -50,7 +50,6 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   // Events
-  event ErrorEvent(string errorMessage);
   event CreateRecipient(address recipientAddress, string recipientName);
   event CreateEvent(string eventName, uint256 signUpFee);
   event SignUpEvent(address addr, uint256 value, uint participantId, string participantName);
@@ -123,17 +122,9 @@ contract SponsoredEvent is Ownable, Depositable {
   function signUpForEvent(string _participantName) public payable onlyActive returns (uint) {
 
     // Are they sending enough to cover the sign-up fee?
-    // if(msg.value < signUpFee) {
-    //   // Remove once web3 supports require messages
-    //   emit ErrorEvent("not enough to cover sign-up fee");
-    // }
     require(msg.value >= signUpFee, "not enough to cover sign-up fee");
 
     // Continue only if the sender is not already registered
-    // if(isRegistered(msg.sender)) {
-    //   // Remove once web3 supports require messages
-    //   emit ErrorEvent("already registered");
-    // }
     require(!isRegistered(msg.sender), "already registered");
 
     // Transfer the sign-up fee from the participant to the event
@@ -182,8 +173,8 @@ contract SponsoredEvent is Ownable, Depositable {
   function participantCompleted(uint[] _participantIds) external onlyOwner onlyActive {
     for (uint i=0; i < _participantIds.length; i++) {
       address _addr = participantsIndex[_participantIds[i]];
-      require(isRegistered(_addr));
-      require(!hasCompleted(_addr));
+      require(isRegistered(_addr), "account is not a participant");
+      require(!hasCompleted(_addr), "account has already completed the event");
       participants[_addr].completed = true;
       emit ParticipantCompletedEvent(i);
     }
@@ -256,16 +247,16 @@ contract SponsoredEvent is Ownable, Depositable {
     Pledge storage thisPledge = pledges[pledgeId];
 
     // This can only be called by the original sponsor
-    require(thisPledge.sponsorAddress == msg.sender);
+    require(thisPledge.sponsorAddress == msg.sender, "pledges can only be reclaimed by the original sponsor");
 
     // Only if the pledge hasn't already been paid
-    require(!thisPledge.paid);
+    require(!thisPledge.paid, "already paid");
 
     address participantAddress = participantsIndex[thisPledge.participantId];
     Participant memory participant = participants[participantAddress];
 
     // If the participant didn't complete
-    require(!participant.completed);
+    require(!participant.completed, "participant did not complete");
 
     // Mark this pledge as paid
     thisPledge.paid = true;

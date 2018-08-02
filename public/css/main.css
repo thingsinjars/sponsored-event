@@ -1,0 +1,18 @@
+#status {
+    text-align: center;
+    background: #eee;
+}
+.wrapper .container {
+    max-width: 80rem;
+}
+
+.navbar {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.navbar > li {
+  list-style: none;
+  margin-left: 2rem;
+}

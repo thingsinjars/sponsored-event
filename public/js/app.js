@@ -4,25 +4,35 @@ App = {
   contracts: {},
   sponsoredEvent: null,
   userAccount: null,
-  onLoad: () => {
+  env: 'local',
+  onLoad: () => {},
 
-  },
-
+  // Load the contract, set up the UI
   init: function() {
-    return App.initWeb3();
+    return App.initWeb3()
+      .then(App.initContract)
+      .then(App.bindEvents)
+      .then(App.initUI)
+      .catch(e => {
+        $('#status').html(e);
+        console.error(e)
+      });
   },
 
-  initWeb3: function() {
+  initWeb3: async function() {
     // Is there an injected web3 instance?
     if (typeof web3 !== 'undefined') {
       App.web3Provider = web3.currentProvider;
     } else {
       // If no injected web3 instance is detected, fall back to Ganache
-      App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
+      App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
     }
-    web3 = new Web3(App.web3Provider);
+    web3 = await new Web3(App.web3Provider);
 
-    return App.initContract();
+    if (!web3.isConnected()) {
+      throw new Error('Not connected to network');
+    }
+
   },
 
   initContract: function() {
@@ -37,16 +47,30 @@ App = {
       })
       .then(() => {
         // Load Gas Price
-        // App.gasPrice = web3.toWei(3, 'gwei');
-        // $.get('https://ethgasstation.info/json/ethgasAPI.json', function(res) {
-        //   App.gasPrice = web3.toWei(res.safeLow / 10, 'gwei'); // for some reason the gas price is 10 times more expensive the one displayed on the web page.
-        // })
-        web3.eth.getGasPrice((err, value) => {
-          App.gasPrice = value.toString();
-        })
-
+        if (App.env !== 'local') {
+          return $.get('https://ethgasstation.info/json/ethgasAPI.json')
+            .then(res => {
+              // The values from ethgasstation are in Gwei tenths
+              // so to convert it to wei: 
+              // LowPrice = json.safeLow/10 * 1000000000
+              return web3.toWei(res.safeLow / 10, 'gwei');
+            })
+        } else {
+          return new Promise((resolve, reject) => {
+            web3.eth.getGasPrice((err, value) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(value.toString());
+              }
+            })
+          });
+        }
       })
-      .then(App.bindEvents);
+      .then(gasPrice => {
+        App.gasPrice = gasPrice
+      });
+
   },
 
   bindEvents: function() {
@@ -55,12 +79,12 @@ App = {
     $(document).on('click', '#signUpButton', App.handleSignUp);
     $(document).on('click', '#loadParticipantButton', App.handleLoadParticipant);
     $(document).on('click', '#pledgeButton', App.handlePledge);
-    $(document).on('click', '#completeButton', App.handleComplete);
+    $(document).on('click', '#endButton', App.handleEndEvent);
+  },
+
+  initUI: function() {
     return App.loadAccount()
-      .then(accounts => {
-        App.userAccount
-        $('.myAccount').html(accounts[0]);
-      });
+      .then(accounts => $('.myAccount').html(accounts[0]))
   },
 
   watchEvent: function() {
@@ -71,10 +95,11 @@ App = {
           toBlock: 'latest'
         })
         .watch(function(error, result) {
+          debugger;
           if (error) {
-            console.error('Error: ' + error);
+            console.error(error);
           } else {
-            console.log('Event: ', result);
+            console.log(result);
           }
         });
     }
@@ -94,6 +119,8 @@ App = {
   showEventDetails: async function() {
     if (App.sponsoredEvent) {
       const eventAddress = App.sponsoredEvent.address;
+      const eventEnded = await App.sponsoredEvent.ended();
+      const eventClosed = await App.sponsoredEvent.closed();
       const signUpFee = await App.sponsoredEvent.signUpFee();
       const eventName = await App.sponsoredEvent.eventName();
       const recipient = await App.sponsoredEvent.recipient();
@@ -104,15 +131,16 @@ App = {
       const recipientName = recipient[0];
       const recipientAddress = recipient[1];
 
-      $('#showEventId').html(eventAddress);
-      $('#showSignUpFee').html(web3.fromWei(signUpFee, 'ether').toNumber() + ' Ether');
+      $('.showEventId').html(eventAddress);
+      $('.showEventStatus').html(eventClosed ? 'closed' : 'eventEnded' ? 'ended' : 'open');
+      $('.showSignUpFee').html(web3.fromWei(signUpFee, 'ether').toNumber() + ' Ether');
       $('.showEventName').html(eventName);
-      $('#showRecipientAddress').html(recipientAddress);
+      $('.showRecipientAddress').html(recipientAddress);
       $('.showRecipientName').html(recipientName);
-      $('#showOrganiserId').html(organiserId);
+      $('.showOrganiserId').html(organiserId);
       $('.showEventBalance').html(web3.fromWei(eventBalance, "ether").toNumber() + ' Ether');
-      $('#showParticipantCount').html(registeredCount.toNumber());
-      $('#showPledgeCount').html(pledgeCount.toNumber());
+      $('.showParticipantCount').html(registeredCount.toNumber());
+      $('.showPledgeCount').html(pledgeCount.toNumber());
       $('#status').html('');
     } else {
       $('#status').html('No event found with that ID');
@@ -153,14 +181,17 @@ App = {
   },
 
   loadEvent: async(eventAddress) => {
+    $('#status').html('loading...');
     try {
       App.sponsoredEvent = await App.contracts.SponsoredEvent.at(eventAddress);
+      $('#status').html('');
       return App.sponsoredEvent;
     } catch (err) {
-      console.log(err.message);
+      console.error(err.message || err);
     }
   },
 
+  // Button handlers
   handleLoad: async(event) => {
     event.preventDefault();
     await App.loadEvent($('#eventId').val());
@@ -201,16 +232,20 @@ App = {
             return eventAddress;
           })
           .catch(function(err) {
-            if (err.message && err.message.match(/the tx doesn't have the correct nonce/).length > 0) {
-              $('#status').html('Reset account in MetaMask.');
+            if (err.message) {
+              const match = err.message.match(/the tx doesn't have the correct nonce/);
+              if (match && match.length > 0 && App.env === 'local') {
+                // NOTE: Only do this during development
+                $('#status').html('Reset account in MetaMask.');
+              }
+              console.error(err.message || err);
             }
-            console.log(err.message);
           });
 
       })
       .catch(err => {
-        console.error(err);
         $('#status').html('No account found. Connect MetaMask or Mist.');
+        console.error(err);
       })
   },
 
@@ -224,17 +259,22 @@ App = {
       const participantName = $('#participantName').val();
       const account = await App.loadAccount().then(accounts => accounts[0]);
 
-      const tx = sponsoredEvent.signUpForEvent(
+      return await sponsoredEvent.signUpForEvent(
         participantName, {
           from: account,
           value: signUpFee,
           gas: 6721975,
           gasPrice: App.gasPrice
         }
-      );
+      )
+      .then(tx => {
+        // TODO: make not fragile
+        const log = tx.logs.filter(log => log.event === 'SignUpEvent')[0];
+        window.location = `/event/${log.address}/participant/${log.args.participantId.toNumber()}`;
+      });
 
     } catch (err) {
-      console.log(err.message);
+      $('#status').html(err.message);
     }
   },
 
@@ -287,7 +327,7 @@ App = {
       })
   },
 
-  handleComplete: async(event) => {
+  handleParticipantComplete: async(event) => {
     event.preventDefault();
     const organiserId = await App.sponsoredEvent.owner();
     const myAccount = await App.loadAccount().then(accounts => accounts[0]);
@@ -321,11 +361,43 @@ App = {
     // .catch(err => {
     //   console.log(err.message);
     // })
+  },
+
+  handleEndEvent: async(event) => {
+    event.preventDefault();
+    const organiserId = await App.sponsoredEvent.owner();
+    const myAccount = await App.loadAccount().then(accounts => accounts[0]);
+    if (organiserId !== myAccount) {
+      $('#status').html('Not the organiser of this event');
+      return;
+    }
+
+    $('#status').html('Ending');
+    $('#completeButton').html('Ending').attr('disabled', 'disabled');
+
+    var participantIds = $("#participantFormList input:checkbox:checked").map(function() {
+      return $(this).val();
+    }).get();
+
+    const sponsoredEvent = await App.loadEvent($('#eventId').val());
+
+    const tx = await sponsoredEvent.endEvent({
+      gas: 6721975,
+      gasPrice: App.gasPrice
+    });
+
+    window.location = `/event/${App.sponsoredEvent.address}`;
+
+    $('#status').html('');
+    $('#completeButton').html('Event ended');
   }
 
 };
 
 $(window).on("load", function() {
   App.init()
-    .then(App.onLoad);
+    .then(App.onLoad)
+    .catch(e => {
+      alert(e)
+    })
 })

@@ -1,14 +1,11 @@
-const Joi = require('joi');
-const Handlers = require('./handlers');
-
 module.exports = [{
   method: 'GET',
   path: '/{param*}',
   handler: {
     directory: {
-      path: 'public'
-    }
-  }
+      path: 'public',
+    },
+  },
 }, {
   method: 'GET',
   path: '/',
@@ -16,10 +13,21 @@ module.exports = [{
     view: {
       template: 'index',
       context: {
-        title: 'My home page'
-      }
-    }
-  }
+        title: 'My home page',
+      },
+    },
+  },
+}, {
+  method: 'GET',
+  path: '/all',
+  handler: {
+    view: {
+      template: 'all',
+      context: {
+        title: 'My home page',
+      },
+    },
+  },
 }, {
   method: 'GET',
   path: '/create',
@@ -27,10 +35,10 @@ module.exports = [{
     view: {
       template: 'create',
       context: {
-        title: 'Create a Sponsored Event'
-      }
-    }
-  }
+        title: 'Create a Sponsored Event',
+      },
+    },
+  },
 }, {
   method: 'GET',
   path: '/event/{eventId}',
@@ -38,10 +46,10 @@ module.exports = [{
     view: {
       template: 'event',
       context: {
-        title: 'Event details'
-      }
-    }
-  }
+        title: 'Event details',
+      },
+    },
+  },
 }, {
   method: 'GET',
   path: '/event/{eventId}/sign-up',
@@ -49,10 +57,10 @@ module.exports = [{
     view: {
       template: 'sign-up',
       context: {
-        title: 'Sign up for this event'
-      }
-    }
-  }
+        title: 'Sign up for this event',
+      },
+    },
+  },
 }, {
   method: 'GET',
   path: '/event/{eventId}/participants',
@@ -60,10 +68,10 @@ module.exports = [{
     view: {
       template: 'participants',
       context: {
-        title: 'All participants'
-      }
-    }
-  }
+        title: 'All participants',
+      },
+    },
+  },
 }, {
   method: 'GET',
   path: '/event/{eventId}/participant/{participantId}',
@@ -71,10 +79,10 @@ module.exports = [{
     view: {
       template: 'participant',
       context: {
-        title: 'Participant details'
-      }
-    }
-  }
+        title: 'Participant details',
+      },
+    },
+  },
 }, {
   method: 'GET',
   path: '/event/{eventId}/participant/{participantId}/pledge',
@@ -82,10 +90,10 @@ module.exports = [{
     view: {
       template: 'pledge',
       context: {
-        title: 'Sponsor a participant'
-      }
-    }
-  }
+        title: 'Sponsor a participant',
+      },
+    },
+  },
 }, {
   method: 'GET',
   path: '/admin/{eventId}/participants',
@@ -93,16 +101,27 @@ module.exports = [{
     view: {
       template: 'admin-participants',
       context: {
-        title: 'Admin participants'
-      }
-    }
-  }
+        title: 'Admin participants',
+      },
+    },
+  },
+}, {
+  method: 'GET',
+  path: '/admin/{eventId}/end',
+  handler: {
+    view: {
+      template: 'admin-end',
+      context: {
+        title: 'Admin end',
+      },
+    },
+  },
 }, {
   method: 'GET',
   path: '/contracts/{param*}',
   handler: {
     directory: {
-      path: 'build/contracts'
-    }
-  }
+      path: 'build/contracts',
+    },
+  },
 }];

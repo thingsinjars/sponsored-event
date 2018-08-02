@@ -1,0 +1,31 @@
+{{!< layout/default.html}}
+<h1>End <a href="/event/{{params.eventId}}" class="showEventName"></a></h1>
+
+<div class="row">
+  <div class="column column-80">
+    <p>End the event. This will automatically transfer sign-up fees and pledges made to participants who <a href="participants">completed the event</a>.</p>
+    <form role="form">
+      <input type="hidden" id="eventId" value="{{params.eventId}}">
+      <button type="submit" id="endButton">End event</button>
+    </form>
+    <nav class="event-nav">
+      <ul>
+        <li><a href="/event/{{params.eventId}}">Event details</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="column column-20">
+    {{> pledged }} {{> account }} {{> admin }}
+  </div>
+</div>
+
+
+{{> scripts }}
+<script>
+App.onLoad = () => {
+  return App.loadEvent("{{params.eventId}}")
+    .then(App.showEventDetails)
+    .then(App.showAllParticipants);
+};
+</script>

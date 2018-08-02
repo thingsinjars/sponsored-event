@@ -1,77 +1,54 @@
 {{!< layout/default.html}}
+<h1><a href="/event/{{params.eventId}}" class="showEventName">…</a></h1>
+<p> for <span class="showRecipientName">…</span> </p>
 
 <div class="row">
-
-  <!-- Post Content Column -->
-  <div class="col-lg-8">
-
-    <!-- Title -->
-    <h1 class="mt-4"><a href="/event/{{params.eventId}}" class="showEventName">…</a></h1>
-
-    <!-- Author -->
-    <p class="lead">
-      for
-      <span class="showRecipientName">…</span>
-    </p>
-
-    <hr>
-
-    <div class="alert alert-light" id="status">Loading</div>
-      <table>
-        <tr>
-          <th>Event</th>
-          <td id="showEventId">{{params.eventId}}</td>
-        </tr>
-        <tr>
-          <th>Sign-up Fee</th>
-          <td id="showSignUpFee">…</td>
-        </tr>
-        <tr>
-          <th>Recipient Address</th>
-          <td id="showRecipientAddress">…</td>
-        </tr>
-        <tr>
-          <th>OrganiserId</th>
-          <td id="showOrganiserId">…</td>
-        </tr>
-        <tr>
-          <th>Participant count</th>
-          <td id="showParticipantCount">…</td>
-        </tr>
-        <tr>
-          <th>Pledge count</th>
-          <td id="showPledgeCount">…</td>
-        </tr>
-        <tr>
-      </table>
-
-    <hr>
-
-    <div class="row justify-content-center">
-      <ul class="nav nav-pills nav-fill">
-        <li><a class="nav-link" href="/event/{{params.eventId}}/participants">Event participants</a></li>
-        <li><a class="nav-link" href="/event/{{params.eventId}}/sign-up">Sign-up for this event</a></li>
+  <div class="column column-80">
+    <table>
+      <tr>
+        <th>Event</th>
+        <td class="showEventId">{{params.eventId}}</td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td class="showEventStatus">…</td>
+      </tr>
+      <tr>
+        <th>Sign-up Fee</th>
+        <td class="showSignUpFee">…</td>
+      </tr>
+      <tr>
+        <th>Recipient Address</th>
+        <td class="showRecipientAddress">…</td>
+      </tr>
+      <tr>
+        <th>OrganiserId</th>
+        <td class="showOrganiserId">…</td>
+      </tr>
+      <tr>
+        <th>Participant count</th>
+        <td class="showParticipantCount">…</td>
+      </tr>
+      <tr>
+        <th>Pledge count</th>
+        <td class="showPledgeCount">…</td>
+      </tr>
+      <tr>
+    </table>
+    <nav class="event-nav">
+      <h2>Event navigation</h2>
+      <ul>
+        <li><a href="/event/{{params.eventId}}/participants">Event participants</a></li>
+        <li><a href="/event/{{params.eventId}}/sign-up">Sign-up for this event</a></li>
       </ul>
-    </div>
-
+    </nav>
   </div>
 
-  <!-- Sidebar Widgets Column -->
-  <div class="col-md-4">
-
-    <!-- Side Widget -->
-    <div class="card my-4">
-      <h5 class="card-header">Raised so far</h5>
-      <div class="card-body">
-        <p class="card-text"><h3 class="showEventBalance text-success"></h3> pledged to this event.</p>
-      </div>
-    </div>
-
-    {{> admin }} {{> search }} {{> categories }}
-
+  <div class="column column-20">
+    {{> pledged }} {{> admin }}
   </div>
-
 </div>
+
 <!-- /.row -->
 {{> scripts }}
 <script>

@@ -1,54 +1,26 @@
 {{!< layout/default.html}}
+<h1><span class="showEventName"></span> participants</h1>
 
-      <div class="row">
-
-        <!-- Post Content Column -->
-        <div class="col-lg-8">
-
-          <!-- Title -->
-          <h1 class="mt-4"><span class="showEventName"></span> participants</h1>
-
-          <hr>
-
-          <div class="alert alert-light" id="status"></div>
-          <div class="row">
-            <ul id="participantList"></ul>
-          </div>
-
-          <hr>
-    <div class="row justify-content-center">
-      <ul class="nav nav-pills nav-fill">
-        <li><a class="nav-link" href="/event/{{params.eventId}}">Event details</a></li>
+<div class="row">
+  <div class="column column-80">
+    <ul id="participantList"></ul>
+    <nav class="event-nav">
+      <h2>Event navigation</h2>
+      <ul>
+        <li><a href="/event/{{params.eventId}}">Event details</a></li>
       </ul>
-    </div>
+    </nav>
 
+  </div>
+  <div class="column column-20">
 
-        </div>
-
-        <!-- Sidebar Widgets Column -->
-        <div class="col-md-4">
-
-          {{> search }}
-
-          {{> categories }}
-
-          <!-- Side Widget -->
-          <div class="card my-4">
-            <h5 class="card-header">Side Widget</h5>
-            <div class="card-body">
-              You can put anything you want inside of these side widgets. They are easy to use, and feature the new Bootstrap 4 card containers!
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-      <!-- /.row -->
+  </div>
+</div>
 {{> scripts }}
-  <script>
-    App.onLoad = () => {
-      return App.loadEvent("{{params.eventId}}")
-        .then(App.showEventDetails)
-        .then(App.showAllParticipants);
-    };
-  </script>
+<script>
+App.onLoad = () => {
+  return App.loadEvent("{{params.eventId}}")
+    .then(App.showEventDetails)
+    .then(App.showAllParticipants);
+};
+</script>

@@ -1,67 +1,41 @@
 {{!< layout/default.html}}
+<h1>Sponsor <a href="/event/{{params.eventId}}/participant/{{params.participantId}}" class="showParticipantName">…</a></h1>
+<p>
+  to take part in
+  <a href="/event/{{params.eventId}}" class="showEventName">…</a> for
+  <a href="/event/{{params.eventId}}" class="showRecipientName">…</a>
+</p>
 
-      <div class="row">
+<div class="row">
+  <div class="column column-80">
 
-        <!-- Post Content Column -->
-        <div class="col-lg-8">
-
-          <!-- Title -->
-          <h1 class="mt-4">Sponsor <a href="/event/{{params.eventId}}/participant/{{params.participantId}}" class="showParticipantName">…</a></h1>
-
-          <!-- Author -->
-          <p class="lead">
-            to take part in
-            <a href="/event/{{params.eventId}}" class="showEventName">…</a> for
-            <a href="/event/{{params.eventId}}" class="showRecipientName">…</a>
-          </p>
-
-          <hr>
-
-          <form class="w-100" id="pledgeTab">
-            <input type="hidden" class="form-control" id="pledgeEventId" placeholder="Enter event ID" value="{{params.eventId}}">
-            <input type="hidden" class="form-control" id="pledgeParticipantId" placeholder="Enter participant ID" value="{{params.participantId}}">
-            <div class="form-group">
-              <label for="sponsorName">Your Name</label>
-              <input type="text" class="form-control" id="sponsorName" placeholder="Enter Sponsor name ID" value="Test Sponsor">
-              <small id="sponsorNameHelp" class="form-text">This is the name that will appear next to the pledge.</small>
-            </div>
-            <div class="form-group">
-              <label for="sponsorAmount">Pledge amount</label>
-              <input type="number" class="form-control" id="pledgeAmount" value="0.02">
-              <small id="sponsorAmountHelp" class="form-text">The amount (in Ether) the sponsor the particpant for. Must be greater than zero.</small>
-            </div>
-            <button type="submit" class="btn btn-light" id="pledgeButton">Pledge</button>
-          </form>
-
-          <hr>
-
-
-        </div>
-
-        <!-- Sidebar Widgets Column -->
-        <div class="col-md-4">
-
-          {{> account }}
-
-          {{> categories }}
-
-          <!-- Side Widget -->
-          <div class="card my-4">
-            <h5 class="card-header">Side Widget</h5>
-            <div class="card-body">
-              You can put anything you want inside of these side widgets. They are easy to use, and feature the new Bootstrap 4 card containers!
-            </div>
-          </div>
-
-        </div>
-
+    <form>
+      <input type="hidden" id="pledgeEventId" placeholder="Enter event ID" value="{{params.eventId}}">
+      <input type="hidden" id="pledgeParticipantId" placeholder="Enter participant ID" value="{{params.participantId}}">
+      <div>
+        <label for="sponsorName">Your Name</label>
+        <input type="text" id="sponsorName" placeholder="Enter Sponsor name ID" value="Test Sponsor">
+        <small id="sponsorNameHelp">This is the name that will appear next to the pledge.</small>
       </div>
-      <!-- /.row -->
+      <div>
+        <label for="sponsorAmount">Pledge amount</label>
+        <input type="number" id="pledgeAmount" value="0.02">
+        <small id="sponsorAmountHelp">The amount (in Ether) the sponsor the particpant for. Must be greater than zero.</small>
+      </div>
+      <button type="submit" id="pledgeButton">Pledge</button>
+    </form>
+  </div>
+
+  <div class="column column-20">
+    {{> account }}
+  </div>
+
+</div>
 {{> scripts }}
-  <script>
-  App.onLoad = () => {
-    return App.loadEvent("{{params.eventId}}")
-      .then(App.showEventDetails)
-      .then(() => App.showParticipantDetails({{params.participantId}}));
-  };
-  </script>
+<script>
+App.onLoad = () => {
+  return App.loadEvent("{{params.eventId}}")
+    .then(App.showEventDetails)
+    .then(() => App.showParticipantDetails({{params.participantId}}));
+};
+</script>

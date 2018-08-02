@@ -1,46 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
+<head>
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Manage sponsored events though smart contracts">
-    <meta name="author" content="Simon Madine">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Manage sponsored events though smart contracts">
+  <meta name="author" content="Simon Madine">
 
-    <title>{{title}} – Sponsored Block</title>
+  <title>{{title}} – Sponsored Block</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="//cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+  <link rel="stylesheet" href="//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
-
-    <!-- Custom styles for this template -->
-    <link href="/css/blog-post.css" rel="stylesheet">
-
-  </head>
-
-  <body>
+<body>
+  <div id="status"></div>
+  <main class="wrapper">
 
     {{> nav }}
 
-    <!-- Page Content -->
-    <div class="container">
-
-      {{! Every view gets inserted here }}
+    <section class="container">
       {{{content}}}
+    </section>
 
-    </div>
-    <!-- /.container -->
-
-    <!-- Footer -->
-    <footer class="py-5 bg-dark">
-      <div class="container">
-        <p class="m-0 text-center text-white">Copyright &copy; Sponsored Block 2018</p>
-      </div>
-      <!-- /.container -->
+    <footer class="container">
+      <p>Copyright &copy; Sponsored Block 2018</p>
     </footer>
-
-  </body>
+  </main>
+</body>
 
 </html>

@@ -1,53 +1,33 @@
 {{!< layout/default.html}}
+<h1>Sign up for <span class="showEventName"></span></h1>
+<p>The sign-up fee for this event is: <span class="showSignUpFee"></span>.</p>
 
-      <div class="row">
-
-        <!-- Post Content Column -->
-        <div class="col-lg-8">
-
-          <!-- Title -->
-          <h1 class="mt-4">{{title}}</h1>
-
-          <hr>
-
-      <form class="w-100" id="signUpTab">
-        <div class="form-group">
-          <label for="signUpEventId">Event ID</label>
-          <input type="text" class="form-control" id="signUpEventId" placeholder="Enter event ID" value="{{params.eventId}}">
-          <small id="signUpEventIdHelp" class="form-text">This is the unique ID of the sponsored event.</small>
-        </div>
-        <div class="form-group">
-          <label for="participantName">Participant Name</label>
-          <input type="text" class="form-control" id="participantName" placeholder="Enter event ID" value="Test Participant">
-          <small id="signUpEventIdHelp" class="form-text">This is the public name of the person taking part.</small>
-        </div>
-        <button type="submit" class="btn btn-light" id="signUpButton">Sign up</button>
-      </form>
-
-          <hr>
-
-
-        </div>
-
-        <!-- Sidebar Widgets Column -->
-        <div class="col-md-4">
-
-          {{> account }}
-
-          {{> search }}
-
-          {{> categories }}
-
-          <!-- Side Widget -->
-          <div class="card my-4">
-            <h5 class="card-header">Side Widget</h5>
-            <div class="card-body">
-              You can put anything you want inside of these side widgets. They are easy to use, and feature the new Bootstrap 4 card containers!
-            </div>
-          </div>
-
-        </div>
-
+<div class="row">
+  <div class="column column-80">
+    <form>
+      <div>
+        <label for="signUpEventId">Event ID</label>
+        <input type="text" id="signUpEventId" placeholder="Enter event ID" value="{{params.eventId}}">
+        <small id="signUpEventIdHelp">This is the unique ID of the sponsored event.</small>
       </div>
-      <!-- /.row -->
-  {{> scripts }}
+      <div>
+        <label for="participantName">Participant Name</label>
+        <input type="text" id="participantName" placeholder="Enter event ID" value="Test Participant">
+        <small id="signUpEventIdHelp">This is the public name of the person taking part.</small>
+      </div>
+      <button type="submit" id="signUpButton">Sign up</button>
+    </form>
+  </div>
+  
+  <div class="column column-20">
+    {{> account }} {{> pledged }}
+  </div>
+</div>
+
+{{> scripts }}
+<script>
+App.onLoad = () => {
+  App.loadEvent("{{params.eventId}}")
+    .then(App.showEventDetails);
+};
+</script>

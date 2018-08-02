@@ -1,59 +1,37 @@
 {{!< layout/default.html}}
+<h1>Admin participants</h1>
+<p class="lead"> for <a href="/event/{{params.eventId}}" class="showEventName"></a></p>
 
 <div class="row">
+  <div class="column column-80">
+    <form role="form">
+      <input type="hidden" id="eventId" value="{{params.eventId}}">
+      <div>
 
-  <!-- Post Content Column -->
-  <div class="col-lg-8">
-
-    <!-- Title -->
-    <h1 class="mt-4">Admin participants</h1>
-
-    <!-- Author -->
-    <p class="lead">
-      for
-      <a href="/event/{{params.eventId}}" class="showEventName"></a>
-    </p>
-
-    <hr>
-
-    <div class="alert alert-light" id="status"></div>
-    <div class="check-row">
-      <form role="form">
-        <input type="hidden" class="form-control" id="eventId" value="{{params.eventId}}">
-        <div class="form-group">
-
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" class="check" id="checkAll"> Check All
-            </label>
-          </div>
-
-          <div id="participantFormList">
-          </div>
+        <div>
+          <label>
+            <input type="checkbox" class="check" id="checkAll"> Check All
+          </label>
         </div>
-        <button type="submit" class="btn btn-primary" id="completeButton">Mark complete</button>
-      </form>
-    </div>
-    <hr>
-    <div class="row justify-content-center">
+
+        <div id="participantFormList">
+        </div>
+      </div>
+      <button type="submit" id="completeButton">Mark complete</button>
+    </form>
+    <nav class="event-nav">
       <ul class="nav nav-pills nav-fill">
         <li><a class="nav-link" href="/event/{{params.eventId}}">Event details</a></li>
       </ul>
-    </div>
-
-
+    </nav>
   </div>
 
-  <!-- Sidebar Widgets Column -->
-  <div class="col-md-4">
-
-    {{> account }}
-    {{> admin }}
-
+  <div class="column column-20">
+    {{> account }} {{> admin }}
   </div>
+
 
 </div>
-<!-- /.row -->
 {{> scripts }}
 <script>
 App.onLoad = () => {

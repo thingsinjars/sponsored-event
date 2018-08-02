@@ -4,7 +4,7 @@
  * @notice
  */
 
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 import './Depositable.sol';
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
@@ -50,6 +50,7 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   // Events
+  event ErrorEvent(string errorMessage);
   event CreateRecipient(address recipientAddress, string recipientName);
   event CreateEvent(string eventName, uint256 signUpFee);
   event SignUpEvent(address addr, uint256 value, uint participantId, string participantName);
@@ -88,7 +89,7 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /**
-   * @dev Creates a SponsoredEvent contract
+   * @notice Creates a SponsoredEvent contract
    *
    * Each SponsoredEvent has:
    *
@@ -100,7 +101,7 @@ contract SponsoredEvent is Ownable, Depositable {
    * @param _recipientAddress where the money goes at the end
    * @param _recipientName Public name of the Recipient of the funds
    */
-  function SponsoredEvent(string _eventName, uint256 _signUpFee, address _recipientAddress, string _recipientName) public {
+  constructor(string _eventName, uint256 _signUpFee, address _recipientAddress, string _recipientName) public {
     // Each event has a single organiser
     organiser = msg.sender;
 
@@ -114,18 +115,26 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /**
-   * @dev Join an event by providing a name and transferring
+   * @notice Join an event by providing a name and transferring
    * the minimum sign-up fee
    *
    * @param _participantName Public name of the event participant
    */
-  function signUpForEvent(string _participantName) public payable returns (uint) {
+  function signUpForEvent(string _participantName) public payable onlyActive returns (uint) {
 
     // Are they sending enough to cover the sign-up fee?
-    require(msg.value >= signUpFee);
+    // if(msg.value < signUpFee) {
+    //   // Remove once web3 supports require messages
+    //   emit ErrorEvent("not enough to cover sign-up fee");
+    // }
+    require(msg.value >= signUpFee, "not enough to cover sign-up fee");
 
     // Continue only if the sender is not already registered
-    require(!isRegistered(msg.sender));
+    // if(isRegistered(msg.sender)) {
+    //   // Remove once web3 supports require messages
+    //   emit ErrorEvent("already registered");
+    // }
+    require(!isRegistered(msg.sender), "already registered");
 
     // Transfer the sign-up fee from the participant to the event
     deposit();
@@ -144,12 +153,12 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /**
-   * @dev Transfer money from the sponsor to the contract
+   * @notice Transfer money from the sponsor to the contract
    *
    * @param _participantId Index of the participant in the participantIndex
    * @param _sponsorName Public name of the sponsor
    */
-  function pledge(uint _participantId, string _sponsorName) public payable {
+  function pledge(uint _participantId, string _sponsorName) public onlyActive payable {
 
     // Add a pledge to this SponsoredEvent's pledge list
     pledges[pledgeCount] = Pledge(msg.sender, msg.value, _participantId, _sponsorName, false);
@@ -161,7 +170,7 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /**
-   * @dev Mark the participant as having completed the event
+   * @notice Mark the participant as having completed the event
    *
    * NOTE: This version doesn't allow partial completion
    *
@@ -181,7 +190,7 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /**
-   * @dev End the event
+   * @notice End the event
    *  - Transfer valid funds and sign-up fees to recipient
    *  - Mark this event as ended
    *
@@ -194,7 +203,7 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /**
-   * @dev Transfer the money to the recipient
+   * @notice Transfer the money to the recipient
    *
    *  - Transfer the balance of pledges given to 
    *    participants who completed the event
@@ -232,7 +241,7 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /**
-   * @dev Reclaim pledge
+   * @notice Reclaim pledge
    *
    * After the event has ended, if the participant did not
    * complete the event, the sponsor can reclaim the pledge
@@ -272,7 +281,7 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /**
-   * @dev Transfers any outstanding funds and closes the contract
+   * @notice Transfers any outstanding funds and closes the contract
    *
    * Any funds remaining in the contract by the time this is called
    * will be transferred to the recipient regardless of the

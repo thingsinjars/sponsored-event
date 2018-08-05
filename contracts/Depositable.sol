@@ -1,5 +1,6 @@
 pragma solidity ^0.4.24;
 
+// Handy: https://ethereum.stackexchange.com/a/43768
 contract Depositable {
     mapping(address => uint256) balances;
 

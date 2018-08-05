@@ -87,6 +87,10 @@ App = {
       .then(accounts => $('.myAccount').html(accounts[0]))
   },
 
+  setStage(stage) {
+    $(`.${stage}`).addClass('active');
+  },
+
   watchEvent: function() {
     if (App.sponsoredEvent) {
       var event = App.sponsoredEvent

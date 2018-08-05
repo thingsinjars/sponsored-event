@@ -5,19 +5,24 @@ Create a sponsored event then manage funds and pledges through a smart contract.
 
 This can be used to manage, collect and distribute donations for any kind of charity event – sponsored walk, climb, run, pogo-stick marathon, etc.
 
-No more chasing people for money after the event. No need to worry about how or whether the money makes it to the charity. Partial completion (e.g. making it half-way around a course, only eating 0.5 million baked beans...) results in partial donation with the remainder returning to the original sponsor.
+No more chasing people for money after the event. No need to worry about how or whether the money makes it to the charity.
 
 This contract also allows cancellation and withdrawal from the event. In that case, the participant's initial sign-up fee is transferred to the receiving charity but any pledges are returned to the sponsor.
 
 Additional information about the event (description, title, images) should be stored off-chain in another database.
 
-Web UI
+**NOTE: Don't actually try to use this yet. It hasn't had nearly enough testing yet to be trusted with real money.**
+
+---
+
+Web App Structure
 ===
 
-Structure
-===
+The web app uses `web3.js` to interact with the smart contract `SponsoredEvent.sol`. It can also interact with a separate content database to keep as much non-critical data off the blockchain as possible.
 
-Additional information such as event description, images, etc. should be stored in a separate database. The blockchain should only be used to manage the pledges.
+![Structure of Web App](public/images/structure.png)
+
+---
 
 Key Concepts
 ===
@@ -76,51 +81,6 @@ After a period of time following the end of an event, **The Organiser** will clo
 Contract Lifecycle
 ===
 
+Each **Sponsored Event** contract starts when **The Organiser** creates it and deploys it on the blockchain. From that point, **The Participants** can sign up and **The Sponsors** can make pledges.
+
 ![Lifecycle of a deployed contract](public/images/states.png)
-
-
-Order of Events
----
-
-Organiser creates Event 
-    (name, recipientName, recipientAddress) 
-        -> EventId
-
-Participant creates EventParticipant for EventId
-    (EventId, participantName, participantAddress, entranceFee)
-        -> EventParticipantId
-
-Sponsor creates Sponsorship
-    (amount, EventParticipantId, eventId)
-        -> SponsorshipId
-
-Organiser confirms completion of Participant 
-    (EventParticipantId, percentage) or (EventId, ParticipantAddress, percentage)
-        -> Event = getEvent(EventParticipantId.eventId)
-        -> Lookup all sponsorshipId where EventParticipantId
-        -> foreach Sponsorship
-             transfer(percentage of Sponsorship.amount, Event.recipientAddress)
-        -> transfer(entranceFee, Event.recipientAddress)
-
-
-Developing
-===
-
-Start Ganache
-
-Use this passphrase:
-
-    circle cage glove rookie note valve naive garlic bacon suffer screen runway
-
-MetaMask password:
-
-    circlecage
-
-After starting and connecting MetaMask, reset the account in Metamask
-
-    MetaMask > Menu > Settings > Reset Account
-
-Start Truffle:
-
-    truffle console --network development
-

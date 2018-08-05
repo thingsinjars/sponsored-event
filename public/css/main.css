@@ -3,7 +3,7 @@
     background: #eee;
 }
 .wrapper .container {
-    max-width: 80rem;
+    max-width: 100rem;
 }
 
 .navbar {
@@ -15,4 +15,54 @@
 .navbar > li {
   list-style: none;
   margin-left: 2rem;
+}
+
+/* Stages */
+.arrow-box {
+    position: relative;
+    background: #cccccc;
+}
+.arrow-box:after {
+    top: 100%;
+    left: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-color: rgba(140, 248, 90, 0);
+    border-top-color: #8cf85a;
+    border-width: 20px;
+    margin-left: -20px;
+}
+li.active~li {background: lightgrey; }
+li.active~li:after { border-top-color: lightgrey; }
+.create { background: #8cf85a; }
+.create:after { border-top-color: #8cf85a; }
+.open   { background: #65d643; }
+.open:after   { border-top-color: #65d643; }
+.end    { background: #fae047; }
+.end:after    { border-top-color: #fae047; }
+.ended  { background: #f7b92b; }
+.ended:after  { border-top-color: #f7b92b; }
+.close  { background: #fc6554; }
+.close:after  { border-top-color: #fc6554; }
+.closed { background: #eb261f; }
+.closed:after { border-top-color: #eb261f; }
+#stage-widget li {
+    margin-bottom: 2rem;
+    list-style: none;
+    text-align: center;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Forms */
+input {
+    margin-bottom: 0;
+}
+input + small {
+    margin-bottom: 1.5rem;
+    display: inline-block;
 }

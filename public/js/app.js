@@ -14,9 +14,25 @@ App = {
       .then(App.bindEvents)
       .then(App.initUI)
       .catch(e => {
-        $('#status').html(e);
+        App.status(e, true);
         console.error(e)
       });
+  },
+
+  status: function(message, error) {
+    clearTimeout(App.statusTimer);
+    if(!message || typeof message === 'undefined') {
+      $('#status').html('');
+      $('#status').removeClass('error');
+    } else {
+      $('#status').html(message);
+      if(error) {
+        $('#status').addClass('error');
+      } else {
+        $('#status').removeClass('error');
+        App.statusTimer = setTimeout(App.status, 5000);
+      }
+    }
   },
 
   initWeb3: async function() {
@@ -57,10 +73,14 @@ App = {
             })
         } else {
           return new Promise((resolve, reject) => {
+            setTimeout(function() {
+              reject('Not connected to network.')
+            }, 10000);
             web3.eth.getGasPrice((err, value) => {
               if (err) {
                 reject(err);
               } else {
+                App.status('Connected to network');
                 resolve(value.toString());
               }
             })
@@ -145,9 +165,9 @@ App = {
       $('.showEventBalance').html(web3.fromWei(eventBalance, "ether").toNumber() + ' Ether');
       $('.showParticipantCount').html(registeredCount.toNumber());
       $('.showPledgeCount').html(pledgeCount.toNumber());
-      $('#status').html('');
+      App.status();
     } else {
-      $('#status').html('No event found with that ID');
+      App.status('No event found with that ID', true);
     }
   },
 
@@ -185,10 +205,10 @@ App = {
   },
 
   loadEvent: async(eventAddress) => {
-    $('#status').html('loading...');
+    App.status('loading...');
     try {
       App.sponsoredEvent = await App.contracts.SponsoredEvent.at(eventAddress);
-      $('#status').html('');
+      App.status();
       return App.sponsoredEvent;
     } catch (err) {
       console.error(err.message || err);
@@ -208,7 +228,7 @@ App = {
 
     return App.loadAccount()
       .then(accounts => {
-        $('#status').html('Creating');
+        App.status('Creating');
         $('#createButton').html('Creating').attr('disabled', 'disabled');
 
         console.info($('#eventName').val(),
@@ -229,7 +249,7 @@ App = {
             window.location = `/event/${eventAddress}`;
             // App.loadEvent(eventAddress)
             //   .then(sponsoredEvent => {
-            //     $('#status').html('');
+            //     App.status('');
             //     App.watchEvent();
             //     App.showEventDetails();
             //   })
@@ -237,18 +257,26 @@ App = {
           })
           .catch(function(err) {
             if (err.message) {
-              const match = err.message.match(/the tx doesn't have the correct nonce/);
+              let match = err.message.match(/the tx doesn't have the correct nonce/);
               if (match && match.length > 0 && App.env === 'local') {
                 // NOTE: Only do this during development
-                $('#status').html('Reset account in MetaMask.');
+                App.status('Reset account in MetaMask.', true);
+              } else {
+                match = err.message.match(/TypeError: Network request failed/);
+                if (match && match.length > 0) {
+                  App.status('Not connected to network.', true);
+                  throw err;
+                }
               }
               console.error(err.message || err);
+              App.status(err.message, true);
+              debugger;
             }
           });
 
       })
       .catch(err => {
-        $('#status').html('No account found. Connect MetaMask or Mist.');
+        App.status('No account found. Connect MetaMask or Mist.');
         console.error(err);
       })
   },
@@ -278,7 +306,7 @@ App = {
       });
 
     } catch (err) {
-      $('#status').html(err.message);
+      App.status(err.message);
     }
   },
 
@@ -297,7 +325,7 @@ App = {
 
   handlePledge: async(event) => {
     event.preventDefault();
-    $('#status').html('Pledging');
+    App.status('Pledging');
     $('#pledgeButton').html('Pledging').attr('disabled', 'disabled');
     return App.loadEvent($('#pledgeEventId').val())
       .then(sponsoredEvent => {
@@ -317,7 +345,7 @@ App = {
             )
           })
           .then(signUpTx => {
-            $('#status').html('');
+            App.status('');
             $('#pledgeButton').html('Pledge').removeAttr('disabled');
             window.location = `/event/${App.sponsoredEvent.address}`;
             return signUpTx;
@@ -336,11 +364,11 @@ App = {
     const organiserId = await App.sponsoredEvent.owner();
     const myAccount = await App.loadAccount().then(accounts => accounts[0]);
     if (organiserId !== myAccount) {
-      $('#status').html('Not the organiser of this event');
+      App.status('Not the organiser of this event', true);
       return;
     }
 
-    $('#status').html('Marking');
+    App.status('Marking');
     $('#completeButton').html('Marking').attr('disabled', 'disabled');
 
     var participantIds = $("#participantFormList input:checkbox:checked").map(function() {
@@ -354,10 +382,10 @@ App = {
       gasPrice: App.gasPrice
     });
 
-    $('#status').html('');
+    App.status('');
     $('#completeButton').html('Mark complete').removeAttr('disabled');
 
-    //   // $('#status').html('');
+    //   // App.status('');
     //   // $('#pledgeButton').html('Pledge').removeAttr('disabled');
     //   // window.location = `/event/${App.sponsoredEvent.address}`;
     //   return signUpTx;
@@ -372,11 +400,11 @@ App = {
     const organiserId = await App.sponsoredEvent.owner();
     const myAccount = await App.loadAccount().then(accounts => accounts[0]);
     if (organiserId !== myAccount) {
-      $('#status').html('Not the organiser of this event');
+      App.status('Not the organiser of this event', error);
       return;
     }
 
-    $('#status').html('Ending');
+    App.status('Ending');
     $('#completeButton').html('Ending').attr('disabled', 'disabled');
 
     var participantIds = $("#participantFormList input:checkbox:checked").map(function() {
@@ -392,7 +420,7 @@ App = {
 
     window.location = `/event/${App.sponsoredEvent.address}`;
 
-    $('#status').html('');
+    App.status();
     $('#completeButton').html('Event ended');
   }
 

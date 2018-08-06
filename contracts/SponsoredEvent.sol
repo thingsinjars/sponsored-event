@@ -68,22 +68,22 @@ contract SponsoredEvent is Ownable, Depositable {
 
   /* Modifiers */
   modifier onlyActive {
-    require(!ended && !closed);
+    require(!ended && !closed, "event is not active");
     _;
   }
 
   modifier onlyEnded {
-    require(ended);
+    require(ended, "event has not ended");
     _;
   }
 
   modifier onlyClosed {
-    require(closed);
+    require(closed, "event has not closed");
     _;
   }
 
   modifier onlyUnclosed {
-    require(!closed);
+    require(!closed, "event has not open";
     _;
   }
 

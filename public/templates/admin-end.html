@@ -16,7 +16,7 @@
   </div>
 
   <div class="column column-20">
-    {{> pledged }} {{> account }} {{> admin }}
+    {{> pledged }} {{> account }} {{> stage }} {{> admin }}
   </div>
 </div>
 
@@ -26,6 +26,7 @@
 App.onLoad = () => {
   return App.loadEvent("{{params.eventId}}")
     .then(App.showEventDetails)
-    .then(App.showAllParticipants);
+    .then(App.showAllParticipants)
+    .then(() => App.setStage('end'));
 };
 </script>

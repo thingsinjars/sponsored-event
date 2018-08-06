@@ -13,7 +13,7 @@ module.exports = [{
     view: {
       template: 'index',
       context: {
-        title: 'My home page',
+        title: 'Sponsored Event',
       },
     },
   },
@@ -24,7 +24,18 @@ module.exports = [{
     view: {
       template: 'all',
       context: {
-        title: 'My home page',
+        title: 'All functionality',
+      },
+    },
+  },
+}, {
+  method: 'GET',
+  path: '/about',
+  handler: {
+    view: {
+      template: 'about',
+      context: {
+        title: 'About Sponsored Events',
       },
     },
   },

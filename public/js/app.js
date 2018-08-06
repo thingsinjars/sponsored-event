@@ -59,7 +59,7 @@ App = {
         App.contracts.SponsoredEvent = TruffleContract(SponsoredEventArtifact);
 
         // Set the provider for our contract
-        App.contracts.SponsoredEvent.setProvider(App.web3Provider);
+        return App.contracts.SponsoredEvent.setProvider(App.web3Provider);
       })
       .then(() => {
         // Load Gas Price
@@ -74,13 +74,13 @@ App = {
         } else {
           return new Promise((resolve, reject) => {
             setTimeout(function() {
-              reject('Not connected to network.')
+              reject('Not connected to web3.')
             }, 10000);
             web3.eth.getGasPrice((err, value) => {
               if (err) {
                 reject(err);
               } else {
-                App.status('Connected to network');
+                App.status('Connected to web3');
                 resolve(value.toString());
               }
             })
@@ -88,7 +88,7 @@ App = {
         }
       })
       .then(gasPrice => {
-        App.gasPrice = gasPrice
+        return App.gasPrice = gasPrice
       });
 
   },
@@ -100,6 +100,7 @@ App = {
     $(document).on('click', '#loadParticipantButton', App.handleLoadParticipant);
     $(document).on('click', '#pledgeButton', App.handlePledge);
     $(document).on('click', '#endButton', App.handleEndEvent);
+    return true;
   },
 
   initUI: function() {
@@ -108,21 +109,22 @@ App = {
   },
 
   setStage(stage) {
-    $(`.${stage}`).addClass('active');
+    $(`.stage`).removeClass('active');
+    $(`.stage-${stage}`).addClass('active');
   },
 
   watchEvent: function() {
     if (App.sponsoredEvent) {
       var event = App.sponsoredEvent
         .allEvents({
-          fromBlock: 0,
+          fromBlock: localStorage.getItem('earliestBlock') || 0,
           toBlock: 'latest'
         })
-        .watch(function(error, result) {
-          debugger;
+        .watch((error, result) => {
           if (error) {
             console.error(error);
           } else {
+            localStorage.setItem('earliestBlock', result.blockNumber);
             console.log(result);
           }
         });
@@ -156,7 +158,11 @@ App = {
       const recipientAddress = recipient[1];
 
       $('.showEventId').html(eventAddress);
-      $('.showEventStatus').html(eventClosed ? 'closed' : 'eventEnded' ? 'ended' : 'open');
+
+      const stage = eventClosed ? 'closed' : eventEnded ? 'ended' : 'open';
+      $('.showEventStatus').html(stage);
+      App.setStage(stage);
+
       $('.showSignUpFee').html(web3.fromWei(signUpFee, 'ether').toNumber() + ' Ether');
       $('.showEventName').html(eventName);
       $('.showRecipientAddress').html(recipientAddress);
@@ -209,6 +215,7 @@ App = {
     try {
       App.sponsoredEvent = await App.contracts.SponsoredEvent.at(eventAddress);
       App.status();
+      App.watchEvent();
       return App.sponsoredEvent;
     } catch (err) {
       console.error(err.message || err);
@@ -219,7 +226,6 @@ App = {
   handleLoad: async(event) => {
     event.preventDefault();
     await App.loadEvent($('#eventId').val());
-    App.watchEvent();
     App.showEventDetails();
   },
 
@@ -295,7 +301,7 @@ App = {
         participantName, {
           from: account,
           value: signUpFee,
-          gas: 6721975,
+          gas: 150000,
           gasPrice: App.gasPrice
         }
       )
@@ -339,7 +345,7 @@ App = {
               participantId, sponsorName, {
                 from: account,
                 value: pledgeAmount,
-                gas: 6721975,
+                gas: 150000,
                 gasPrice: App.gasPrice
               }
             )
@@ -414,7 +420,7 @@ App = {
     const sponsoredEvent = await App.loadEvent($('#eventId').val());
 
     const tx = await sponsoredEvent.endEvent({
-      gas: 6721975,
+      gas: 60000,
       gasPrice: App.gasPrice
     });
 

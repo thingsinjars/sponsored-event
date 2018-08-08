@@ -5,6 +5,7 @@ Object.assign(App, {
     $(document).on('click', '#signUpButton', App.handleSignUp);
     $(document).on('click', '#loadParticipantButton', App.handleLoadParticipant);
     $(document).on('click', '#pledgeButton', App.handlePledge);
+    $(document).on('click', '#completeButton', App.handleParticipantComplete);
     $(document).on('click', '#endButton', App.handleEndEvent);
     return true;
   },
@@ -170,7 +171,7 @@ Object.assign(App, {
     const sponsoredEvent = await App.loadEvent($('#eventId').val());
 
     const tx = await sponsoredEvent.participantCompleted(participantIds, {
-      gas: 6721975,
+      gas: 32000,
       gasPrice: App.gasPrice
     });
 

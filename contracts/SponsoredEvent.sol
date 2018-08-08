@@ -16,7 +16,7 @@ contract SponsoredEvent is Ownable, Depositable {
   uint256 public signUpFee;
   address public organiser;
   Recipient public recipient;
-  uint public registeredCount = 0;
+  uint public participantCount = 0;
 
   // The number of pledges
   uint public pledgeCount = 0;
@@ -58,6 +58,7 @@ contract SponsoredEvent is Ownable, Depositable {
   event RecipientTransfer(address addr, uint256 pledgeAmount);
   event WithdrawEvent(address addr, bool returned, uint256 pledgeAmount);
   event Closure(uint256 finalAmount);
+  event Cancellation();
 
   // Maintain list of all sponsors so they can be refunded if the event is cancelled
   mapping(uint => Pledge) public pledges;
@@ -83,7 +84,7 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   modifier onlyUnclosed {
-    require(!closed, "event has not open";
+    require(!closed, "event is not open");
     _;
   }
 
@@ -131,16 +132,16 @@ contract SponsoredEvent is Ownable, Depositable {
     deposit();
 
     // Create participant lookups
-    participantsIndex[registeredCount] = msg.sender;
+    participantsIndex[participantCount] = msg.sender;
     participants[msg.sender] = Participant(_participantName, msg.sender, false, false);
 
-    emit SignUpEvent(msg.sender, msg.value, registeredCount, _participantName);
+    emit SignUpEvent(msg.sender, msg.value, participantCount, _participantName);
 
     // Increase the number of participants registered for this event
-    registeredCount++;
+    participantCount++;
 
     // return the number of people registered
-    return registeredCount;
+    return participantCount;
   }
 
   /**
@@ -163,10 +164,10 @@ contract SponsoredEvent is Ownable, Depositable {
   /**
    * @notice Mark the participant as having completed the event
    *
-   * NOTE: This version doesn't allow partial completion
+   * **NOTE: This version doesn't allow partial completion**
    *
-   * modifier: onlyOwner Only the organiser of this event may call this
-   * modifier: onlyActive Only events that have not ended
+   *  * modifier: `onlyOwner` Only the organiser of this event may call this
+   *  * modifier: `onlyActive` Only events that have not ended
    *
    * @param _participantIds Array of participants who have completed the event
    */
@@ -182,11 +183,12 @@ contract SponsoredEvent is Ownable, Depositable {
 
   /**
    * @notice End the event
-   *  - Transfer valid funds and sign-up fees to recipient
-   *  - Mark this event as ended
    *
-   * modifier: onlyOwner Only the organiser of this event may call this
-   * modifier: onlyActive Only events that have not ended
+   *  * Transfer valid funds and sign-up fees to recipient
+   *  * Mark this event as ended
+   *
+   *  * modifier: `onlyOwner` Only the organiser of this event may call this
+   *  * modifier: `onlyActive` Only events that have not ended
    */
   function endEvent() external onlyOwner onlyActive {
     transferToRecipient();
@@ -201,31 +203,33 @@ contract SponsoredEvent is Ownable, Depositable {
    *    to the intended recipient and end the event.
    *  - Mark the event as ended
    *
-   * modifier: onlyOwner Only the organiser of this event may call this
-   * modifier: onlyActive Only events that have not ended
+   *  * modifier: `onlyOwner` Only the organiser of this event may call this
+   *  * modifier: `onlyActive` Only events that have not ended
    */
-  function transferToRecipient() internal onlyOwner onlyActive {
+  function transferToRecipient() internal {
     uint256 transferAmount = 0;
+
+    // For each pledge
     for (uint i = 0; i < pledgeCount; i++) {
       // Pledge storage thisPledge = pledges[pledgeIndex[i]];
       Pledge storage thisPledge = pledges[i];
 
-      // This pledge hasn't been paid yet
+      // If this pledge hasn't been paid yet
       if(!thisPledge.paid) {
+
         // If this participant has completed the event
         address participantAddress = participantsIndex[thisPledge.participantId];
         if(hasCompleted(participantAddress)) {
           transferAmount += thisPledge.pledgeAmount;
           thisPledge.paid = true;
-
-          participants[participantAddress].completed = true;
-
-          // Also include the signup fee from each participant
-          transferAmount += signUpFee;
         }
       }
     }
 
+    // Also include the signup fee from each participant
+    transferAmount += participantCount * signUpFee;
+
+    // Transfer the total pledges + sign-up fees
     recipient.recipientAddress.transfer(transferAmount);
 
     emit RecipientTransfer(recipient.recipientAddress, transferAmount);
@@ -238,8 +242,8 @@ contract SponsoredEvent is Ownable, Depositable {
    * complete the event, the sponsor can reclaim the pledge
    * or send it to the recipient anyway
    *
-   * modifier: onlyEnded This event must have passed
-   * modifier: onlyUnclosed This contract is still open
+   *  * modifier: `onlyEnded` This event must have passed
+   *  * modifier: `onlyUnclosed` This contract is still open
    *
    * @param _returnPledge Should this be returned to the sponsor?
    */
@@ -278,8 +282,8 @@ contract SponsoredEvent is Ownable, Depositable {
    * will be transferred to the recipient regardless of the
    * participant's completion status
    * 
-   * modifier: onlyEnded This event must have passed
-   * modifier: onlyUnclosed This contract is still open
+   *  * modifier: `onlyEnded` This event must have passed
+   *  * modifier: `onlyUnclosed` This contract is still open
    */
   function closeEvent() public onlyOwner onlyEnded onlyUnclosed {
     uint256 finalPayout = getContractBalance();
@@ -289,13 +293,38 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /**
-   * Cancel the event
+   * @notice Cancel the event
    *
-   * Transfer all the pledged money back to the sponsors
-   * Transfer the sign-up fee back to the participant
+   *  * Transfer all the pledged money back to the sponsors
+   *  * Transfer the sign-up fee back to the participant
+   * 
+   *  * modifier: `onlyOwner` Only the organiser of this event may call this
+   *  * modifier: `onlyActive` Only events that have not ended
    */
-  // function cancelEvent() public onlyOwner onlyActive {
-  // }
+  function cancelEvent() public onlyOwner onlyActive {
+    ended = true;
+    cancelled = true;
+
+    // For each pledge
+    for (uint i = 0; i < pledgeCount; i++) {
+      // Pledge storage thisPledge = pledges[pledgeIndex[i]];
+      Pledge memory thisPledge = pledges[i];
+
+      // Only if the pledge hasn't already been paid
+      require(!thisPledge.paid, "already paid");
+
+      // Return it to the sponsor
+      thisPledge.sponsorAddress.transfer(thisPledge.pledgeAmount);
+    }
+
+    // For each participant
+    for (i=0; i < participantCount; i++) {
+      address _addr = participantsIndex[i];
+      _addr.transfer(signUpFee);
+    }
+
+    emit Cancellation();
+  }
 
   /* Helper */
   function isRegistered(address _addr) constant public returns (bool) {

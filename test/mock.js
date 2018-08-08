@@ -3,5 +3,6 @@ module.exports = {
     signUpFee: 20000,
     recipientAddress: 0x1,
     recipientName: 'Test Recipient Name',
-    participantName: 'Test Participant'
+    participantName: 'Test Participant',
+    sponsorName: 'Test Sponsor'
 }

@@ -8,19 +8,19 @@ App = {
   onLoad: () => {},
 
   // Load the contract, set up the UI
-  init: function() {
+  init: () => {
     return App.initWeb3()
       .then(App.initContract)
       .then(App.bindEvents)
       .then(App.initUI)
-      .catch(e => {
-        App.status(e, true);
+      .catch((err) => {
+        App.status(err, true);
         $('button').attr('disabled', 'true');
-        console.error(e)
+        console.error(err)
       });
   },
 
-  status: function(message, error) {
+  status: (message, error) => {
     clearTimeout(App.statusTimer);
     if(!message || typeof message === 'undefined') {
       $('#status').html('');
@@ -36,7 +36,7 @@ App = {
     }
   },
 
-  initWeb3: async function() {
+  initWeb3: async () => {
     // Is there an injected web3 instance?
     if (typeof web3 !== 'undefined') {
       App.web3Provider = web3.currentProvider;
@@ -53,12 +53,12 @@ App = {
 
   },
 
-  initContract: function() {
+  initContract: () => {
     return fetch('/contracts/SponsoredEvent.json')
       .then(res => res.json())
-      .then(data => {
+      .then((data) => {
         // Get the necessary contract artifact file and instantiate it with truffle-contract
-        var SponsoredEventArtifact = data;
+        const SponsoredEventArtifact = data;
         App.contracts.SponsoredEvent = TruffleContract(SponsoredEventArtifact);
 
         // Set the provider for our contract
@@ -69,36 +69,35 @@ App = {
         if (App.env !== 'local') {
           return fetch('https://ethgasstation.info/json/ethgasAPI.json')
             .then(res => res.json())
-            .then(data => {
+            .then((data) => {
               // The values from ethgasstation are in Gwei tenths
               // so to convert it to wei: 
               // LowPrice = json.safeLow/10 * 1000000000
               return web3.toWei(data.safeLow / 10, 'gwei');
-            })
-        } else {
-          return new Promise((resolve, reject) => {
-            setTimeout(function() {
-              reject('Not connected to web3.')
-            }, 10000);
-            web3.eth.getGasPrice((err, value) => {
-              if (err) {
-                reject(err);
-              } else {
-                App.status('Connected to web3');
-                resolve(value.toString());
-              }
-            })
-          });
+            });
         }
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            reject(new Error('Not connected to web3.'));
+          }, 10000);
+          web3.eth.getGasPrice((err, value) => {
+            if (err) {
+              reject(err);
+            } else {
+              App.status('Connected to web3');
+              resolve(value.toString());
+            }
+          })
+        });
       })
-      .then(gasPrice => {
-        return App.gasPrice = gasPrice
+      .then((gasPrice) => {
+        App.gasPrice = gasPrice
       });
   },
 
-  watchEvent: function() {
+  watchEvent: () => {
     if (App.sponsoredEvent) {
-      var event = App.sponsoredEvent
+      const event = App.sponsoredEvent
         .allEvents({
           fromBlock: localStorage.getItem('earliestBlock') || 0,
           toBlock: 'latest'
@@ -114,7 +113,7 @@ App = {
     }
   },
 
-  loadAccount: function() {
+  loadAccount: () => {
     return new Promise((resolve, reject) => {
       web3.eth.getAccounts((error, accounts) => {
         if (error) {
@@ -125,7 +124,7 @@ App = {
     });
   },
 
-  loadEvent: async(eventAddress) => {
+  loadEvent: async (eventAddress) => {
     App.status('loading...');
     try {
       App.sponsoredEvent = await App.contracts.SponsoredEvent.at(eventAddress);
@@ -133,15 +132,17 @@ App = {
       App.watchEvent();
       return App.sponsoredEvent;
     } catch (err) {
+      debugger;
+      App.status(err.message, true);
       console.error(err.message || err);
     }
   }
 };
 
-$(window).on("load", function() {
+$(window).on("load", () => {
   App.init()
     .then(App.onLoad)
-    .catch(e => {
-      alert(e)
+    .catch((err) => {
+      alert(err);
     })
 });

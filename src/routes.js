@@ -129,6 +129,17 @@ module.exports = [{
   },
 }, {
   method: 'GET',
+  path: '/admin/{eventId}/close',
+  handler: {
+    view: {
+      template: 'admin-close',
+      context: {
+        title: 'Admin close',
+      },
+    },
+  },
+}, {
+  method: 'GET',
   path: '/contracts/{param*}',
   handler: {
     directory: {

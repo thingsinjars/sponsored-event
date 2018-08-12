@@ -1,52 +1,32 @@
 {{!< layout/default.html}}
-
+<h1>Close the event</h1>
+<p>Finalise and close the event transferring any remaining unclaimed funds to the recipient.</p>
 <div class="row">
-
-  <!-- Post Content Column -->
-  <div class="col-lg-8">
-
-    <!-- Title -->
-    <h1 class="mt-4">Transfer funds</h1>
-
-    <!-- Author -->
-    <p class="lead">
-      for
-      <a href="/event/{{params.eventId}}" class="showEventName"></a>
-    </p>
-
-    <hr>
-
-    <div class="row">
+  <div class="column column-80">
       <form role="form">
         <input type="hidden" class="form-control" id="eventId" value="{{params.eventId}}">
-        <button type="submit" class="btn btn-primary" id="transferButton">Transfer funds</button>
+        <button type="submit" class="btn btn-primary" id="closeButton">Close</button>
       </form>
-    </div>
-    <hr>
-    <div class="row justify-content-center">
-      <ul class="nav nav-pills nav-fill">
-        <li><a class="nav-link" href="/event/{{params.eventId}}">Event details</a></li>
+    <nav class="event-nav">
+      <ul>
+        <li>
+          <a href="/event/{{params.eventId}}">Event details</a>
+        </li>
       </ul>
-    </div>
-
-
+    </nav>
   </div>
-
-  <!-- Sidebar Widgets Column -->
-  <div class="col-md-4">
-
-    {{> pledged }}
-    {{> admin }}
-
+    
+  <div class="column column-20">
+      {{> pledged }} {{> account }} {{> stage }} {{> admin }}
   </div>
-
 </div>
-<!-- /.row -->
+
 {{> scripts }}
 <script>
 App.onLoad = () => {
   return App.loadEvent("{{params.eventId}}")
     .then(App.showEventDetails)
-    .then(App.showAllParticipants);
+    .then(App.showAllParticipants)
+    .then(() => App.setStage('close'));
 };
 </script>

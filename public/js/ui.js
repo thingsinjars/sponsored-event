@@ -1,15 +1,15 @@
 Object.assign(App, {
-  initUI: function() {
+  initUI: () => {
     return App.loadAccount()
       .then(accounts => $('.myAccount').html(accounts[0]))
   },
 
   setStage(stage) {
-    $(`.stage`).removeClass('active');
+    $('.stage').removeClass('active');
     $(`.stage-${stage}`).addClass('active');
   },
 
-  showEventDetails: async function() {
+  showEventDetails: async () => {
     if (App.sponsoredEvent) {
       const eventAddress = App.sponsoredEvent.address;
       const eventEnded = await App.sponsoredEvent.ended();
@@ -19,7 +19,7 @@ Object.assign(App, {
       const recipient = await App.sponsoredEvent.recipient();
       const organiserId = await App.sponsoredEvent.owner();
       const eventBalance = await App.sponsoredEvent.getContractBalance();
-      const registeredCount = await App.sponsoredEvent.registeredCount();
+      const participantCount = await App.sponsoredEvent.participantCount();
       const pledgeCount = await App.sponsoredEvent.pledgeCount();
       const recipientName = recipient[0];
       const recipientAddress = recipient[1];
@@ -36,7 +36,7 @@ Object.assign(App, {
       $('.showRecipientName').html(recipientName);
       $('.showOrganiserId').html(organiserId);
       $('.showEventBalance').html(web3.fromWei(eventBalance, "ether").toNumber() + ' Ether');
-      $('.showParticipantCount').html(registeredCount.toNumber());
+      $('.showParticipantCount').html(participantCount.toNumber());
       $('.showPledgeCount').html(pledgeCount.toNumber());
       App.status();
     } else {
@@ -44,9 +44,9 @@ Object.assign(App, {
     }
   },
 
-  showAllParticipants: async function() {
+  showAllParticipants: async () => {
     if (App.sponsoredEvent) {
-      const count = (await App.sponsoredEvent.registeredCount()).toNumber();
+      const count = (await App.sponsoredEvent.participantCount()).toNumber();
       const list = $('#participantList');
       const formList = $('#participantFormList');
       for (let i = 0; i < count; i++) {
@@ -61,13 +61,13 @@ Object.assign(App, {
           formList.append(`<div class="checkbox"> <label> <input type="checkbox" class="check" name="participants" value="${i}"> ${participantDetails[0]}</label> </div>`);
         }
       }
-      $("#checkAll").click(function() {
-        $(".check").prop('checked', $(this).prop('checked'));
+      $('#checkAll').click((e) => {
+        $('.check').prop('checked', $(e.target).prop('checked'));
       });
     }
   },
 
-  showParticipantDetails: async(participantId) => {
+  showParticipantDetails: async (participantId) => {
     if (App.sponsoredEvent) {
       const participantAddress = await App.sponsoredEvent.participantsIndex(participantId);
       const participantDetails = await App.sponsoredEvent.participants(participantAddress);
@@ -75,5 +75,6 @@ Object.assign(App, {
       $('.showParticipantName').html(participantDetails[0]);
       $('.showParticipantAddress').html(participantAddress);
     }
-  }
+  },
+
 });

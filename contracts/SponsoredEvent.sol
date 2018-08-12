@@ -4,10 +4,11 @@
  * @notice
  */
 
-pragma solidity ^0.4.24;
+pragma solidity ^ 0.4 .24;
 
-import './Depositable.sol';
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import "./Depositable.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
 
 /** @title SponsoredEvent */
 contract SponsoredEvent is Ownable, Depositable {
@@ -64,8 +65,8 @@ contract SponsoredEvent is Ownable, Depositable {
   mapping(uint => Pledge) public pledges;
 
   // Participant[] public participants;
-  mapping (address => Participant) public participants;
-  mapping (uint => address) public participantsIndex;
+  mapping(address => Participant) public participants;
+  mapping(uint => address) public participantsIndex;
 
   /* Modifiers */
   modifier onlyActive {
@@ -120,7 +121,7 @@ contract SponsoredEvent is Ownable, Depositable {
    *
    * @param _participantName Public name of the event participant
    */
-  function signUpForEvent(string _participantName) public payable onlyActive returns (uint) {
+  function signUpForEvent(string _participantName) public payable onlyActive returns(uint) {
 
     // Are they sending enough to cover the sign-up fee?
     require(msg.value >= signUpFee, "not enough to cover sign-up fee");
@@ -172,7 +173,7 @@ contract SponsoredEvent is Ownable, Depositable {
    * @param _participantIds Array of participants who have completed the event
    */
   function participantCompleted(uint[] _participantIds) external onlyOwner onlyActive {
-    for (uint i=0; i < _participantIds.length; i++) {
+    for (uint i = 0; i < _participantIds.length; i++) {
       address _addr = participantsIndex[_participantIds[i]];
       require(isRegistered(_addr), "account is not a participant");
       require(!hasCompleted(_addr), "account has already completed the event");
@@ -215,11 +216,11 @@ contract SponsoredEvent is Ownable, Depositable {
       Pledge storage thisPledge = pledges[i];
 
       // If this pledge hasn't been paid yet
-      if(!thisPledge.paid) {
+      if (!thisPledge.paid) {
 
         // If this participant has completed the event
         address participantAddress = participantsIndex[thisPledge.participantId];
-        if(hasCompleted(participantAddress)) {
+        if (hasCompleted(participantAddress)) {
           transferAmount += thisPledge.pledgeAmount;
           thisPledge.paid = true;
         }
@@ -265,7 +266,7 @@ contract SponsoredEvent is Ownable, Depositable {
     // Mark this pledge as paid
     thisPledge.paid = true;
 
-    if(_returnPledge) {
+    if (_returnPledge) {
       // Return it to the sponsor
       thisPledge.sponsorAddress.transfer(thisPledge.pledgeAmount);
     } else {
@@ -318,7 +319,7 @@ contract SponsoredEvent is Ownable, Depositable {
     }
 
     // For each participant
-    for (i=0; i < participantCount; i++) {
+    for (i = 0; i < participantCount; i++) {
       address _addr = participantsIndex[i];
       _addr.transfer(signUpFee);
     }
@@ -327,11 +328,11 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /* Helper */
-  function isRegistered(address _addr) constant public returns (bool) {
+  function isRegistered(address _addr) constant public returns(bool) {
     return participants[_addr].participantAddress != address(0);
   }
 
-  function hasCompleted(address _addr) constant public returns (bool) {
+  function hasCompleted(address _addr) constant public returns(bool) {
     return isRegistered(_addr) && participants[_addr].completed;
   }
 

@@ -57,7 +57,9 @@ li.active~li {
 li.active~li:after {
   border-top-color: lightgrey;
 }
-
+#stage-widget.loading li {
+ visibility: hidden;
+}
 .stage-create {
   background: #8cf85a;
 }
@@ -128,4 +130,8 @@ input+small {
 
 .myAccount {
     word-wrap: break-word;
+}
+
+.admin {
+  display: none;
 }

@@ -17,51 +17,30 @@ Object.assign(App, {
     App.showEventDetails();
   },
 
-  handleCreate: (event) => {
+  handleCreate: async (event) => {
     event.preventDefault();
 
-    return App.loadAccount()
-      .then(() => {
-        App.status('Creating');
-        $('#createButton').html('Creating').attr('disabled', 'disabled');
+    try {
+      const account = await App.loadAccount();
+    } catch (err) {
+      App.status('No account found. Connect MetaMask or Mist.');
+      throw err;
+    }
 
-        console.info($('#eventName').val(),
-          web3.toWei(+$('#signUpFee').val(), 'ether'),
-          $('#recipientAddress').val(),
-          $('#recipientName').val()
-        );
-        App.contracts.SponsoredEvent.new(
-          $('#eventName').val(),
-          web3.toWei(+$('#signUpFee').val(), 'ether'),
-          $('#recipientAddress').val(),
-          $('#recipientName').val()
-        ).then((instance) => {
-          return instance.address;
-        }).then((eventAddress) => {
-          $('#createButton').html('Create').removeAttr('disabled');
-          window.location = `/event/${eventAddress}`;
-          return eventAddress;
-        }).catch((err) => {
-          if (err.message) {
-            let match = err.message.match(/the tx doesn't have the correct nonce/);
-            if (match && match.length > 0 && App.env === 'local') {
-              // NOTE: Only do this during development
-              App.status('Reset account in MetaMask.', true);
-            } else {
-              match = err.message.match(/TypeError: Network request failed/);
-              if (match && match.length > 0) {
-                App.status('Not connected to network.', true);
-                throw err;
-              }
-            }
-            console.error(err.message || err);
-            App.status(err.message, true);
-          }
-        });
-      }).catch((err) => {
-        App.status('No account found. Connect MetaMask or Mist.');
-        console.error(err);
-      });
+    App.status('Creating');
+    $('#createButton').html('Creating').attr('disabled', 'disabled');
+
+    try {
+      const sponsoredEventInstance = await App.contracts.SponsoredEvent.new(
+            $('#eventName').val(),
+            web3.toWei(+$('#signUpFee').val(), 'ether'),
+            $('#recipientAddress').val(),
+            $('#recipientName').val()
+          );
+      window.location = `/event/${sponsoredEventInstance.address}`;
+    } catch (err) {
+        App.status(err.message || err, true);
+    }
   },
 
   handleSignUp: async (event) => {
@@ -75,19 +54,17 @@ Object.assign(App, {
       const participantName = $('#participantName').val();
       const account = await App.loadAccount().then(accounts => accounts[0]);
 
-      return await sponsoredEvent.signUpForEvent(
+      const tx = await sponsoredEvent.signUpForEvent(
         participantName, {
           from: account,
           value: signUpFee,
           gas: 150000,
           gasPrice: App.gasPrice
         }
-      ).then((tx) => {
-        // TODO: make not fragile
-        const log = tx.logs.filter(log => log.event === 'SignUpEvent')[0];
-        window.location = `/event/${log.address}/participant/${log.args.participantId.toNumber()}`;
-      });
+      );
 
+      const log = tx.logs.filter(log => log.event === 'SignUpEvent')[0];
+      window.location = `/event/${log.address}/participant/${log.args.participantId.toNumber()}`;
     } catch (err) {
       throw new Error(err);
     }
@@ -98,10 +75,6 @@ Object.assign(App, {
     await App.loadEvent($('#signUpEventId').val())
 
     const participantAddress = await App.sponsoredEvent.participantsIndex(0);
-    console.log(participantAddress);
-
-    const participantDetails = await App.sponsoredEvent.participants(participantAddress);
-    console.log(participantDetails);
 
     return participantAddress;
   },
@@ -110,36 +83,27 @@ Object.assign(App, {
     event.preventDefault();
     App.status('Pledging');
     $('#pledgeButton').html('Pledging').attr('disabled', 'disabled');
-    return App.loadEvent($('#pledgeEventId').val())
-      .then((sponsoredEvent) => {
-        const participantId = $('#pledgeParticipantId').val();
-        const sponsorName = $('#sponsorName').val();
-        const pledgeAmount = web3.toWei(+$('#pledgeAmount').val(), 'ether');
-        return App.loadAccount()
-          .then(accounts => accounts[0])
-          .then((account) => {
-            return sponsoredEvent.pledge(
-              participantId, sponsorName, {
-                from: account,
-                value: pledgeAmount,
-                gas: 150000,
-                gasPrice: App.gasPrice
-              }
-            )
-          })
-          .then((signUpTx) => {
-            App.status('');
-            $('#pledgeButton').html('Pledge').removeAttr('disabled');
-            window.location = `/event/${App.sponsoredEvent.address}`;
-            return signUpTx;
-          })
-          .catch((err) => {
-            console.log(err.message);
-          });
-      })
-      .catch((err) => {
-        console.log(err.message);
-      })
+    try {
+      const sponsoredEvent = App.loadEvent($('#pledgeEventId').val());
+      const participantId = $('#pledgeParticipantId').val();
+      const sponsorName = $('#sponsorName').val();
+      const pledgeAmount = web3.toWei(+$('#pledgeAmount').val(), 'ether');
+      const accounts = App.loadAccount();
+      const tx = sponsoredEvent.pledge(
+                participantId, sponsorName, {
+                  from: accounts[0],
+                  value: pledgeAmount,
+                  gas: 150000,
+                  gasPrice: App.gasPrice
+                }
+              );
+
+      window.location = `/event/${App.sponsoredEvent.address}`;
+
+    } catch (err) {
+      App.status(err.message || err);
+      throw err;
+    }
   },
 
   handleParticipantComplete: async (event) => {

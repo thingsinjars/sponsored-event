@@ -4,9 +4,11 @@ Object.assign(App, {
       .then(accounts => $('.myAccount').html(accounts[0]))
   },
 
+
   setStage(stage) {
     $('.stage').removeClass('active');
     $(`.stage-${stage}`).addClass('active');
+    $('#stage-widget').removeClass('loading');
   },
 
   showEventDetails: async () => {
@@ -29,6 +31,7 @@ Object.assign(App, {
       const stage = eventClosed ? 'closed' : eventEnded ? 'ended' : 'open';
       $('.showEventStatus').html(stage);
       App.setStage(stage);
+      App.showAdmin(organiserId);
 
       $('.showSignUpFee').html(web3.fromWei(signUpFee, 'ether').toNumber() + ' Ether');
       $('.showEventName').html(eventName);
@@ -41,6 +44,15 @@ Object.assign(App, {
       App.status();
     } else {
       App.status('No event found with that ID', true);
+    }
+  },
+
+  // Helper to make UI nicer
+  showAdmin: async(eventOwner) => {
+    const owner = await App.sponsoredEvent.owner();
+    const accounts = await App.loadAccount();
+    if(owner === accounts[0]) {
+      $('.admin').removeClass('admin');
     }
   },
 

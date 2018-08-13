@@ -82,11 +82,6 @@ contract SponsoredEvent is Ownable, Depositable {
     _;
   }
 
-  modifier onlyClosed {
-    require(closed, "event has not closed");
-    _;
-  }
-
   modifier onlyUnclosed {
     require(!closed, "event is not open");
     _;

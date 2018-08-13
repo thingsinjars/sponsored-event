@@ -4,7 +4,7 @@
  * @notice
  */
 
-pragma solidity ^ 0.4 .24;
+pragma solidity 0.4.24;
 
 import "./Depositable.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -29,6 +29,9 @@ contract SponsoredEvent is Ownable, Depositable {
   bool public closed = false;
 
   bool public cancelled = false;
+
+  // Thie total amount transferred to the recipient
+  uint256 public recipientReceivedTotal = 0;
 
   struct Recipient {
     string recipientName;
@@ -58,7 +61,7 @@ contract SponsoredEvent is Ownable, Depositable {
   event ParticipantCompletedEvent(uint participantId);
   event RecipientTransfer(address addr, uint256 pledgeAmount);
   event WithdrawEvent(address addr, bool returned, uint256 pledgeAmount);
-  event Closure(uint256 finalAmount);
+  event Closure(uint256 finalAmount, uint256 recipientReceivedTotal);
   event Cancellation();
 
   // Maintain list of all sponsors so they can be refunded if the event is cancelled
@@ -233,6 +236,8 @@ contract SponsoredEvent is Ownable, Depositable {
     // Transfer the total pledges + sign-up fees
     recipient.recipientAddress.transfer(transferAmount);
 
+    recipientReceivedTotal += transferAmount;
+
     emit RecipientTransfer(recipient.recipientAddress, transferAmount);
   }
 
@@ -289,7 +294,8 @@ contract SponsoredEvent is Ownable, Depositable {
   function closeEvent() public onlyOwner onlyEnded onlyUnclosed {
     uint256 finalPayout = getContractBalance();
     recipient.recipientAddress.transfer(finalPayout);
-    emit Closure(finalPayout);
+    recipientReceivedTotal += finalPayout;
+    emit Closure(finalPayout, recipientReceivedTotal);
     closed = true;
   }
 

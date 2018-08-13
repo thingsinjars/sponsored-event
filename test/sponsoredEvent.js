@@ -19,12 +19,16 @@ contract('SponsoredEvent', (accounts) => {
 
   contract('create', () => {
     it('should create a new event', () => {
-      return testEvent.eventName();
-      assert.equal(eventName, mock.eventName);
+      return testEvent.eventName()
+        .then(eventName => {
+          assert.equal(eventName, mock.eventName);
+        })
     });
     it('should create a new recipient', () => {
-      return testEvent.recipient();
-      assert.equal(recipient[1], mock.recipientAddress);
+      return testEvent.recipient()
+        .then(recipient => {
+          assert.equal(recipient[1], mock.recipientAddress);
+        })
     });
   });
 
@@ -60,5 +64,32 @@ contract('SponsoredEvent', (accounts) => {
           assert.equal(tx.receipt.status, 0x1, 'Pledge was not successful');
         });
     });
+  });
+
+  contract('participant complete', (accounts) => {
+    beforeEach(() => {
+      return testEvent.signUpForEvent(mock.participantName, {
+          from: accounts[0],
+          value: mock.signUpFee,
+          gas: 150000,
+          gasPrice: 1
+        });
+    });
+
+    it('should mark a participant as completed', async () => {
+      await testEvent.participantCompleted([0])
+      const participantIndex = await testEvent.participantsIndex(0);
+      const participant = await testEvent.participants(participantIndex);
+      assert(participant[0][2], 'Participant marked as completed');
+    });
+
+    it('should not mark a non-participant as completed', async () => {
+      try {
+        await testEvent.participantCompleted([1])
+      } catch(err) {
+        err.message.match(/revert/);
+      }
+    });
+
   });
 });

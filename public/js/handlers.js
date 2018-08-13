@@ -7,6 +7,7 @@ Object.assign(App, {
     $(document).on('click', '#pledgeButton', App.handlePledge);
     $(document).on('click', '#completeButton', App.handleParticipantComplete);
     $(document).on('click', '#endButton', App.handleEndEvent);
+    $(document).on('click', '#closeButton', App.handleCloseEvent);
     return true;
   },
 
@@ -180,7 +181,7 @@ Object.assign(App, {
     }
 
     App.status('Ending');
-    $('#completeButton').html('Ending').attr('disabled', 'disabled');
+    $('#endButton').html('Ending').attr('disabled', 'disabled');
 
     const sponsoredEvent = await App.loadEvent($('#eventId').val());
 
@@ -204,20 +205,17 @@ Object.assign(App, {
       return;
     }
 
-    App.status('Ending');
-    $('#completeButton').html('Ending').attr('disabled', 'disabled');
+    App.status('Closing');
+    $('#closeButton').html('Closing').attr('disabled', 'disabled');
 
     const sponsoredEvent = await App.loadEvent($('#eventId').val());
 
-    const tx = await sponsoredEvent.endEvent({
+    const tx = await sponsoredEvent.closeEvent({
       gas: 360000,
       gasPrice: App.gasPrice,
     });
 
     window.location = `/event/${App.sponsoredEvent.address}`;
-
-    App.status();
-    $('#completeButton').html('Event ended');
   }
 
 });

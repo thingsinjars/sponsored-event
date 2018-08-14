@@ -21,6 +21,7 @@ Object.assign(App, {
       const recipient = await App.sponsoredEvent.recipient();
       const organiserId = await App.sponsoredEvent.owner();
       const eventBalance = await App.sponsoredEvent.getContractBalance();
+      const recipientReceivedTotal = await App.sponsoredEvent.recipientReceivedTotal();
       const participantCount = await App.sponsoredEvent.participantCount();
       const pledgeCount = await App.sponsoredEvent.pledgeCount();
       const recipientName = recipient[0];
@@ -39,6 +40,7 @@ Object.assign(App, {
       $('.showRecipientName').html(recipientName);
       $('.showOrganiserId').html(organiserId);
       $('.showEventBalance').html(web3.fromWei(eventBalance, "ether").toNumber() + ' Ether');
+      $('.showEventTransferred').html(web3.fromWei(recipientReceivedTotal, "ether").toNumber() + ' Ether');
       $('.showParticipantCount').html(participantCount.toNumber());
       $('.showPledgeCount').html(pledgeCount.toNumber());
       App.status();

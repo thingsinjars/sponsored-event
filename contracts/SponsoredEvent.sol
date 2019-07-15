@@ -4,10 +4,10 @@
  * @notice
  */
 
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.8;
 
 import "./Depositable.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
 /** @title SponsoredEvent */
@@ -35,11 +35,11 @@ contract SponsoredEvent is Ownable, Depositable {
 
   struct Recipient {
     string recipientName;
-    address recipientAddress;
+    address payable recipientAddress;
   }
 
   struct Pledge {
-    address sponsorAddress;
+    address payable sponsorAddress;
     uint256 pledgeAmount;
     uint participantId;
     string sponsorName;
@@ -69,7 +69,7 @@ contract SponsoredEvent is Ownable, Depositable {
 
   // Participant[] public participants;
   mapping(address => Participant) public participants;
-  mapping(uint => address) public participantsIndex;
+  mapping(uint => address payable) public participantsIndex;
 
   /* Modifiers */
   modifier onlyActive {
@@ -100,7 +100,7 @@ contract SponsoredEvent is Ownable, Depositable {
    * @param _recipientAddress where the money goes at the end
    * @param _recipientName Public name of the Recipient of the funds
    */
-  constructor(string _eventName, uint256 _signUpFee, address _recipientAddress, string _recipientName) public {
+  constructor(string memory _eventName, uint256 _signUpFee, address payable _recipientAddress, string memory _recipientName) public {
     // Each event has a single organiser
     organiser = msg.sender;
 
@@ -119,7 +119,7 @@ contract SponsoredEvent is Ownable, Depositable {
    *
    * @param _participantName Public name of the event participant
    */
-  function signUpForEvent(string _participantName) public payable onlyActive returns(uint) {
+  function signUpForEvent(string memory _participantName) public payable onlyActive returns(uint) {
 
     // Are they sending enough to cover the sign-up fee?
     require(msg.value >= signUpFee, "not enough to cover sign-up fee");
@@ -149,7 +149,7 @@ contract SponsoredEvent is Ownable, Depositable {
    * @param _participantId Index of the participant in the participantIndex
    * @param _sponsorName Public name of the sponsor
    */
-  function pledge(uint _participantId, string _sponsorName) public onlyActive payable {
+  function pledge(uint _participantId, string memory _sponsorName) public onlyActive payable {
 
     // Add a pledge to this SponsoredEvent's pledge list
     pledges[pledgeCount] = Pledge(msg.sender, msg.value, _participantId, _sponsorName, false);
@@ -170,7 +170,7 @@ contract SponsoredEvent is Ownable, Depositable {
    *
    * @param _participantIds Array of participants who have completed the event
    */
-  function participantCompleted(uint[] _participantIds) external onlyOwner onlyActive {
+  function participantCompleted(uint[] calldata _participantIds) external onlyOwner onlyActive {
     for (uint i = 0; i < _participantIds.length; i++) {
       address _addr = participantsIndex[_participantIds[i]];
       require(isRegistered(_addr), "account is not a participant");
@@ -320,8 +320,8 @@ contract SponsoredEvent is Ownable, Depositable {
     }
 
     // For each participant
-    for (i = 0; i < participantCount; i++) {
-      address _addr = participantsIndex[i];
+    for (uint i = 0; i < participantCount; i++) {
+      address payable _addr = participantsIndex[i];
       _addr.transfer(signUpFee);
     }
 
@@ -329,11 +329,11 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /* Helper */
-  function isRegistered(address _addr) constant public returns(bool) {
+  function isRegistered(address _addr) view public returns(bool) {
     return participants[_addr].participantAddress != address(0);
   }
 
-  function hasCompleted(address _addr) constant public returns(bool) {
+  function hasCompleted(address _addr) view public returns(bool) {
     return isRegistered(_addr) && participants[_addr].completed;
   }
 

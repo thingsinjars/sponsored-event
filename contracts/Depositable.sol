@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.8;
 
 // Handy: https://ethereum.stackexchange.com/a/43768
 contract Depositable {
@@ -17,5 +17,5 @@ contract Depositable {
         return address(this);
     }
     function deposit() public payable {balances[msg.sender]+=msg.value;}
-    function() public payable {deposit();}
+    function() external payable {deposit();}
 }

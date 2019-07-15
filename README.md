@@ -15,6 +15,19 @@ Additional information about the event (description, title, images) should be st
 
 ---
 
+Getting started
+===
+
+Install Truffle and Ganache CLI
+---
+
+    npm i -g truffle ganache-cli
+
+Start the development web server
+---
+
+    npm run dev
+
 Web App Structure
 ===
 
@@ -62,17 +75,17 @@ Withdrawal
 
 If **The Participant** withdraws, all money pledged to them is automatically available for **The Sponsor** to reclaim. The participant's sign-up fee is not returned.
 
-Ending
+Ending an event
 ---
 
 **The Organiser** can mark an event as Ended. This will transfer completed pledges and sign-up fees to **The Recipient**.
 
-Retrieval
+Retrieval period
 ---
 
-Once the event has ended, **The Sponsor** is able to reclaim any funds donated to **Participants** who did not complete the event. The funds are not automatically returned as **The Event** may not have enough to cover the transaction fees.
+Once the event has ended, **The Sponsor** is able to reclaim any funds donated to **Participants** who did not complete the event. It is possible to implement push here so that funds are automatically returned but this carries risks as **The Event** may not have enough to cover the transaction fees. It's safer to implement a pull model here so that any fees are guaranteed to be covered.
 
-Closing
+Closing the contract
 ---
 
 After a period of time following the end of an event, **The Organiser** will close the event. This will transfer any remaining balance to **The Recipient**.

@@ -1,0 +1,157 @@
+html, body {
+  padding: 0;
+  margin: 0;
+  background: #f5f5f5;
+  height: 100%;
+}
+#app {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+#main {
+  /*width: 50rem;*/
+  margin: 0;
+}
+.body {
+  max-width: 70rem;
+  margin: 0 auto;
+  padding: 1rem 0;
+  text-align: left;
+  background: white;
+}
+.body h1, .body h2, .body form, .body p, .body ul, .body table {
+  margin: 1rem;
+}
+.body li {
+  margin-left: 1rem;
+}
+.body form p {
+  margin: 0 0 1rem 0;
+}
+.mainnav {
+  height: 3rem;
+  margin: 0;
+  background: white;
+  line-height: 3rem;
+  border-bottom: 1px solid #efefef;
+  /*justify-content: space-between;*/
+}
+.mainnav div {
+  float:left;
+  margin-right: 1rem;
+}
+.mainnav .sign-in {
+  float:right;
+  cursor: pointer;
+}
+.event-nav ul {
+  display: flex;
+  margin: 1rem;
+  list-style: none;
+}
+.event-nav li {
+  margin-right: 1rem;
+}
+.event-nav li a{
+  text-decoration: none;
+    color: #FF2F92;
+
+}
+.event-nav li a:hover{
+  color: #2c3e50;
+}
+  .logo {
+  font-weight: bold;
+  text-decoration: none;
+  color: #FF2F92;
+  font-size: 1.2rem;
+  margin: 0 1rem;
+}
+.sidebar {
+    width: 20rem;
+    margin-left: 1rem;
+    border-left: 1px solid lightgrey;
+    padding: 1rem 0 1rem 1rem;
+    height: 100%;
+}
+.sidebar h2 {
+  margin-left: 0;
+}
+a {
+  color: #2c3e50;
+}
+a:hover {
+  color: #FF2F92;
+}
+table {
+  width: 100%;
+}
+th {
+  text-align: left;
+}
+td {
+  text-align: left;
+}
+p {
+  margin: 0 1rem 1rem 1rem;
+}
+ul {
+  margin:0;
+  padding: 0;
+}
+.form {
+  background: white;
+  text-align: left;
+  padding: 1rem;
+}
+label {
+  display: block;
+}
+.small {
+  margin-top:0;
+  font-size: 1rem;
+}
+  .hello {
+    width: auto;
+    background: url(/static/img/hero.jpg) 50% 50% no-repeat;
+    height: 500px;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    justify-content: center;
+}
+.hello h1 {
+    color: white;
+    margin: 7rem 0 0 0;
+}
+.hello p {
+    color: white;
+  margin: 0;
+}
+.hello .button {
+    margin: 2rem;
+    background: #e88b00;
+    width: 250px;
+    margin: 2rem auto;
+    padding: 10px;
+    border-radius: 4px;
+    color: white;
+    align-self: flex-end;
+}
+.hello .button a {
+      color: white;
+text-decoration: none;
+}
+.obviousbutton {
+  cursor: pointer;
+    background: #FF2F92;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 1rem 2rem;
+    font-weight: bold;
+    font-size: 1rem;
+}

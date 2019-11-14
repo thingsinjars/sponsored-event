@@ -7,7 +7,7 @@
 pragma solidity ^0.5.8;
 
 import "./Depositable.sol";
-import "./openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 
 /** @title SponsoredEvent */
@@ -15,6 +15,7 @@ contract SponsoredEvent is Ownable, Depositable {
 
   string public eventName;
   uint256 public signUpFee;
+  uint256 public target;
   address public organiser;
   Recipient public recipient;
   uint public participantCount = 0;
@@ -55,7 +56,7 @@ contract SponsoredEvent is Ownable, Depositable {
 
   // Events
   event CreateRecipient(address recipientAddress, string recipientName);
-  event CreateEvent(string eventName, uint256 signUpFee);
+  event CreateEvent(string eventName, uint256 signUpFee, uint256 target);
   event SignUpEvent(address addr, uint256 value, uint participantId, string participantName);
   event NewPledge(uint pledgeId, address sponsorAddress, uint256 pledgeAmount, uint256 balance);
   event ParticipantCompletedEvent(uint participantId);
@@ -97,20 +98,23 @@ contract SponsoredEvent is Ownable, Depositable {
    *
    * @param _eventName Public name of the Sponsored Event
    * @param _signUpFee Fee paid by the participants to join
+   * @param _target Fundraising target
    * @param _recipientAddress where the money goes at the end
    * @param _recipientName Public name of the Recipient of the funds
    */
-  constructor(string memory _eventName, uint256 _signUpFee, address payable _recipientAddress, string memory _recipientName) public {
+  constructor(string memory _eventName, uint256 _signUpFee, uint256 _target, address payable _recipientAddress, string memory _recipientName) 
+    public {
     // Each event has a single organiser
     organiser = msg.sender;
 
     eventName = _eventName;
     signUpFee = _signUpFee;
+    target = _target;
 
     // Each event has a single recipient
     recipient = Recipient(_recipientName, _recipientAddress);
     emit CreateRecipient(_recipientAddress, _recipientName);
-    emit CreateEvent(_eventName, _signUpFee);
+    emit CreateEvent(_eventName, _signUpFee, _target);
   }
 
   /**
@@ -119,13 +123,17 @@ contract SponsoredEvent is Ownable, Depositable {
    *
    * @param _participantName Public name of the event participant
    */
-  function signUpForEvent(string memory _participantName) public payable onlyActive returns(uint) {
+  function signUpForEvent(string calldata _participantName) 
+    external
+    payable
+    onlyActive
+    returns(uint) {
 
     // Are they sending enough to cover the sign-up fee?
     require(msg.value >= signUpFee, "not enough to cover sign-up fee");
 
     // Continue only if the sender is not already registered
-    require(!isRegistered(msg.sender), "already registered");
+    require(!this.isRegistered(msg.sender), "already registered");
 
     // Transfer the sign-up fee from the participant to the event
     deposit();
@@ -149,7 +157,11 @@ contract SponsoredEvent is Ownable, Depositable {
    * @param _participantId Index of the participant in the participantIndex
    * @param _sponsorName Public name of the sponsor
    */
-  function pledge(uint _participantId, string memory _sponsorName) public onlyActive payable {
+  function pledge(uint _participantId, string calldata _sponsorName)
+    external
+    onlyActive
+    payable
+    returns (uint) {
 
     // Add a pledge to this SponsoredEvent's pledge list
     pledges[pledgeCount] = Pledge(msg.sender, msg.value, _participantId, _sponsorName, false);
@@ -158,6 +170,8 @@ contract SponsoredEvent is Ownable, Depositable {
 
     // Increase the number of pledges
     pledgeCount++;
+
+    return pledgeCount;
   }
 
   /**
@@ -170,11 +184,14 @@ contract SponsoredEvent is Ownable, Depositable {
    *
    * @param _participantIds Array of participants who have completed the event
    */
-  function participantCompleted(uint[] calldata _participantIds) external onlyOwner onlyActive {
+  function participantCompleted(address[] memory _participantIds) 
+    public
+    onlyOwner
+    onlyActive {
     for (uint i = 0; i < _participantIds.length; i++) {
-      address _addr = participantsIndex[_participantIds[i]];
-      require(isRegistered(_addr), "account is not a participant");
-      require(!hasCompleted(_addr), "account has already completed the event");
+      address _addr = _participantIds[i];
+      require(this.isRegistered(_addr), "account is not a participant");
+      require(!this.hasCompleted(_addr), "account has already completed the event");
       participants[_addr].completed = true;
       emit ParticipantCompletedEvent(i);
     }
@@ -218,7 +235,7 @@ contract SponsoredEvent is Ownable, Depositable {
 
         // If this participant has completed the event
         address participantAddress = participantsIndex[thisPledge.participantId];
-        if (hasCompleted(participantAddress)) {
+        if (this.hasCompleted(participantAddress)) {
           transferAmount += thisPledge.pledgeAmount;
           thisPledge.paid = true;
         }
@@ -286,7 +303,12 @@ contract SponsoredEvent is Ownable, Depositable {
    *  * modifier: `onlyEnded` This event must have passed
    *  * modifier: `onlyUnclosed` This contract is still open
    */
-  function closeEvent() public onlyOwner onlyEnded onlyUnclosed {
+  function closeEvent() 
+    external
+    onlyOwner
+    onlyEnded
+    onlyUnclosed {
+
     uint256 finalPayout = getContractBalance();
     recipient.recipientAddress.transfer(finalPayout);
     recipientReceivedTotal += finalPayout;
@@ -303,7 +325,11 @@ contract SponsoredEvent is Ownable, Depositable {
    *  * modifier: `onlyOwner` Only the organiser of this event may call this
    *  * modifier: `onlyActive` Only events that have not ended
    */
-  function cancelEvent() public onlyOwner onlyActive {
+  function cancelEvent() 
+    external
+    onlyOwner
+    onlyActive {
+
     ended = true;
     cancelled = true;
 
@@ -329,12 +355,12 @@ contract SponsoredEvent is Ownable, Depositable {
   }
 
   /* Helper */
-  function isRegistered(address _addr) view public returns(bool) {
+  function isRegistered(address _addr) view external returns(bool) {
     return participants[_addr].participantAddress != address(0);
   }
 
-  function hasCompleted(address _addr) view public returns(bool) {
-    return isRegistered(_addr) && participants[_addr].completed;
+  function hasCompleted(address _addr) view external returns(bool) {
+    return this.isRegistered(_addr) && participants[_addr].completed;
   }
 
 }

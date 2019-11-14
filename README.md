@@ -1,6 +1,8 @@
 Sponsored Event
 ===
 
+**NOTE: Don't actually try to use this on mainnet yet. It hasn't had nearly enough testing yet to be trusted with real money. Plus, the contract is too expensive to deploy.**
+
 Create a sponsored event then manage funds and pledges through a smart contract.
 
 This can be used to manage, collect and distribute donations for any kind of charity event – sponsored walk, climb, run, pogo-stick marathon, etc.
@@ -11,29 +13,46 @@ This contract also allows cancellation and withdrawal from the event. In that ca
 
 Additional information about the event (description, title, images) should be stored off-chain in another database.
 
-**NOTE: Don't actually try to use this yet. It hasn't had nearly enough testing yet to be trusted with real money.**
 
 ---
 
 Getting started
 ===
 
-Install Truffle and Ganache CLI
+Install Truffle
 ---
 
-    npm i -g truffle ganache-cli
+    npm i -g truffle
+
+Compile the contracts
+---
+
+    truffle compile
+
+Install and Start Ganache
+---
+
+[https://www.trufflesuite.com/ganache](https://www.trufflesuite.com/ganache)
 
 Start the development web server
 ---
 
     npm run dev
 
+Screenshots
+===
+
+<a href="static/screenshots/home.png"><img src="static/screenshots/home.png" width="200"></a>
+<a href="static/screenshots/create.png"><img src="static/screenshots/create.png" width="200"></a>
+<a href="static/screenshots/event.png"><img src="static/screenshots/event.png" width="200"></a>
+<a href="static/screenshots/participant.png"><img src="static/screenshots/participant.png" width="200"></a>
+
 Web App Structure
 ===
 
 The web app uses `web3.js` to interact with the smart contract `SponsoredEvent.sol`. It can also interact with a separate content database to keep as much non-critical data off the blockchain as possible.
 
-![Structure of Web App](public/images/structure.png)
+![Structure of Web App](static/img/structure.png)
 
 ---
 
@@ -96,4 +115,5 @@ Contract Lifecycle
 
 Each **Sponsored Event** contract starts when **The Organiser** creates it and deploys it on the blockchain. From that point, **The Participants** can sign up and **The Sponsors** can make pledges.
 
-![Lifecycle of a deployed contract](public/images/states.png)
+![Lifecycle of a deployed contract](static/img/states.png)
+
